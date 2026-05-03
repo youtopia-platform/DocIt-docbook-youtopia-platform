@@ -1,22 +1,22 @@
-# SUMMARY.md
+# workflow.md
 
 _Automatic documentation generation failed._
 
 ## Provider Status
 Total providers: 3
-Healthy providers: 3
-- ✅ Gemini (errors: 1)
+Healthy providers: 0
+- ❌ Gemini (errors: 3)
   - Last error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. 
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
 * Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash
-* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
-* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
-Please retry in 6.342781037s. [links {
+Please retry in 55.816083524s. [links {
   description: "Learn more about Gemini API quotas"
   url: "https://ai.google.dev/gemini-api/docs/rate-limits"
 }
 , violations {
-  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_input_token_count"
-  quota_id: "GenerateContentInputTokensPerModelPerMinute-FreeTier"
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
   quota_dimensions {
     key: "model"
     value: "gemini-2.0-flash"
@@ -39,8 +39,8 @@ violations {
   }
 }
 violations {
-  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
-  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_input_token_count"
+  quota_id: "GenerateContentInputTokensPerModelPerMinute-FreeTier"
   quota_dimensions {
     key: "model"
     value: "gemini-2.0-flash"
@@ -51,22 +51,22 @@ violations {
   }
 }
 , retry_delay {
-  seconds: 6
+  seconds: 55
 }
 ]
-- ✅ Groq (errors: 1)
-  - Last error: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01k5mme46vfndbaxpmvvyx5fdf` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99926, Requested 4587. Please try again in 1h4m59.232s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}
-- ✅ DeepSeek (errors: 1)
+- ❌ Groq (errors: 3)
+  - Last error: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01k5mme46vfndbaxpmvvyx5fdf` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99911, Requested 4577. Please try again in 1h4m37.632s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}
+- ❌ DeepSeek (errors: 3)
   - Last error: Error code: 402 - {'error': {'message': 'Insufficient Balance', 'type': 'unknown_error', 'param': None, 'code': 'invalid_request_error'}}
 
 ## Code (truncated)
 ```
-You are DocAI, an expert technical writer analyzing THIS SPECIFIC REPOSITORY.
+You are DocAI, an expert process analyst documenting ACTUAL workflows.
 
 Persona: dev
 Repository: docai_manual_c1hbtn92
-
-ACTUAL CODEBASE ANALYSIS:
+VERSION: v1.0
+CODE ANALYSIS:
 {
   "project_name": "docai_manual_c1hbtn92",
   "file_count": 195,
@@ -92,7 +92,7 @@ ACTUAL CODEBASE ANALYSIS:
     "./.devcontainer/prebuilt-checkout-page-server-node",
     "./.devcontainer/custom-payment-flow-server-dotnet",
     "./.devcontainer/custom-payment-flow-server-node",
-    "./.devcontainer/payment-elemen...
+    "./.devcontainer/payment-element-cli...
 ```
 
 ## Manual Documentation Needed
