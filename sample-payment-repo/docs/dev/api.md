@@ -10,7 +10,7 @@ Healthy providers: 0
 * Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
 * Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
 * Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash
-Please retry in 55.678415835s. [links {
+Please retry in 470.227323ms. [links {
   description: "Learn more about Gemini API quotas"
   url: "https://ai.google.dev/gemini-api/docs/rate-limits"
 }
@@ -51,7 +51,6 @@ violations {
   }
 }
 , retry_delay {
-  seconds: 55
 }
 ]
 
@@ -60,10 +59,10 @@ violations {
 You are DocAI, an expert API writer documenting REAL endpoints from this repository.
 
 Persona: dev
-Repository: docai_manual_k5o0_6lv
+Repository: docai_manual_xp0oeq0j
 CODE ANALYSIS:
 {
-  "project_name": "docai_manual_k5o0_6lv",
+  "project_name": "docai_manual_xp0oeq0j",
   "file_count": 195,
   "languages": [
     "py",
