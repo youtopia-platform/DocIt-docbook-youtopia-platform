@@ -1,222 +1,329 @@
-# docai_manual_yogn4xpx
+# Payments Backend API - `docai_smart_dkpaon23`
 
-This repository, `docai_manual_yogn4xpx`, serves as a comprehensive collection of example applications and documentation for integrating various payment flows across a diverse set of programming languages and frontend frameworks. It's designed to provide developers with practical, ready-to-use samples demonstrating how to implement custom payment flows, utilize payment elements, and integrate prebuilt checkout pages.
+Welcome to the Payments Backend API repository! This project serves as a comprehensive example and implementation of a robust, secure, and feature-rich payment processing backend. It demonstrates various server-side technologies interacting with a payment gateway (implied by Stripe integration) and provides client-side examples for integration.
 
-The primary focus is on showcasing robust payment integrations (likely with a service like Stripe, given the internal dependencies) within a consistent and easily reproducible development environment facilitated by Dev Containers.
+This repository recently underwent a significant upgrade, introducing **API v2.0**, which enhances security, standardizes responses, and expands payment-related functionalities.
 
-## Table of Contents
+---
 
--   [Overview](#overview)
--   [Architecture](#architecture)
--   [Getting Started](#getting-started)
--   [Usage](#usage)
--   [Project Structure](#project-structure)
--   [API Overview](#api-overview)
--   [Development Workflow](#development-workflow)
--   [Key Dependencies](#key-dependencies)
--   [Deployment](#deployment)
--   [Contributing](#contributing)
--   [License](#license)
+## 🚀 Overview
 
-## Overview
+The `payments-backend` repository provides a collection of backend server implementations (in Java, Node.js, Next.js, Python, and Ruby) that expose a unified API for managing payment intents, customers, refunds, and orders. It is designed to be highly extensible and serves as a reference for building secure payment systems.
 
-`docai_manual_yogn4xpx` is a monorepo containing multiple independent application examples. Each example demonstrates a specific aspect of payment integration, offering both backend server implementations and, where applicable, corresponding frontend client applications. The examples span a wide array of popular technologies, including:
+**Key Highlights of API v2.0:**
 
-*   **Backend Languages/Frameworks**: Python (Flask), Node.js, Go, Java, Ruby, .NET
-*   **Frontend Frameworks**: React, Vue
+*   **Mandatory API Key Authentication**: All v2 API endpoints now require an `X-API-Key` header for enhanced security.
+*   **API Versioning**: All new and updated endpoints are prefixed with `/api/v2/`.
+*   **Standardized Responses**: Consistent success and error response formats across all endpoints.
+*   **Extended Payment Features**: New dedicated endpoints for customer creation, retrieving payment intent status, processing refunds, and fetching order details.
+*   **Breaking Changes**: Existing clients must migrate to API v2.0, updating endpoint paths, authentication headers, and request/response structures.
 
-The repository heavily leverages [VS Code Dev Containers](https://code.visualstudio.com/docs/devcontainers/containers) to provide a pre-configured and isolated development environment, ensuring all necessary tools and dependencies are available out-of-the-box for each example.
+This upgrade significantly improves the API's maintainability, security, and developer experience.
 
-## Architecture
+## 🏛️ Architecture
 
-The repository follows a multi-example architecture, where each subdirectory within `.devcontainer/` represents a self-contained project:
+The project adopts a polyglot architecture, showcasing how different backend technologies can implement the same API specification.
 
-*   **Modular Examples**: Each example (e.g., `payment-element-server-python`, `payment-element-client-react-cra`) is designed to be largely independent, focusing on a specific payment integration pattern.
-*   **Client-Server Structure**: Many examples consist of a backend server (e.g., handling payment intent creation, webhooks) and a frontend client (e.g., rendering payment forms, displaying results).
-*   **Technology Diversity**: The collection highlights how to achieve similar payment goals using different technology stacks, allowing developers to choose examples relevant to their own projects.
-*   **Containerized Development**: The entire development environment is defined using `devcontainer.json` files, enabling a consistent setup across different developer machines and operating systems.
+*   **Multiple Backend Implementations**:
+    *   Each language (Java, Node.js, Next.js, Python, Ruby) has its own server implementation, demonstrating how to handle API routing, authentication, and business logic.
+    *   These servers are responsible for interacting with the external payment gateway (e.g., Stripe) to perform payment operations.
+*   **Authentication Middleware**: A common authentication layer is applied across all v2 endpoints, enforcing API key validation.
+*   **Centralized Routing Concept**: Although implemented separately in each language, the API routes follow a consistent pattern (`/api/v2/...`).
+*   **Client Examples**: Frontend applications (HTML, React) are provided to demonstrate how to integrate with the authenticated v2 API endpoints.
 
-## Getting Started
+```
++----------------+       +---------------------+
+|  Client (HTML) |       |  Client (React)     |
++----------------+       +---------------------+
+        |                       |
+        |  HTTPS Requests       |  HTTPS Requests
+        v                       v
++------------------------------------------------+
+|           API Gateway / Load Balancer          | (Conceptual/Implicit)
+|           (Routes to specific backend)         |
++------------------------------------------------+
+        |  API v2.0 (X-API-Key)
+        v
++-------------------------------------------------------------------------------------------------------+
+|                                  Backend Services (Polyglot)                                          |
+|  +-------------------+  +-------------------+  +-------------------+  +-------------------+  +-------------------+  |
+|  |   Java Server     |  |   Node.js Server  |  |   Next.js Server  |  |   Python Server   |  |   Ruby Server     |  |
+|  | (API v2 Logic)    |<->| (API v2 Logic)    |<->| (API v2 Logic)    |<->| (API v2 Logic)    |<->| (API v2 Logic)    |  |
+|  +-------------------+  +-------------------+  +-------------------+  +-------------------+  +-------------------+  |
+|        | API Key Auth / Payment Intent / Refunds / Customers / Orders Logic (Shared Specification)                     |
++-------------------------------------------------------------------------------------------------------+
+        |
+        v
++----------------------+
+| External Payment GW  | (e.g., Stripe)
++----------------------+
+```
 
-To get started with the examples in this repository, you'll primarily use VS Code Dev Containers for the best experience.
+## 🚀 Getting Started
+
+To run this project locally, you'll need to set up the environment variables and start at least one backend server along with a client example.
 
 ### Prerequisites
 
-*   [**Git**](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
-*   [**Docker Desktop**](https://www.docker.com/products/docker-desktop/) (or a compatible Docker engine)
-*   [**Visual Studio Code**](https://code.visualstudio.com/)
-*   [**VS Code Dev Containers Extension**](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+*   **Git**: For cloning the repository.
+*   **Node.js & npm/yarn**: For Node.js/Next.js backends and React/HTML clients.
+*   **Java Development Kit (JDK)**: For the Java backend.
+*   **Python 3 & pip**: For the Python backend.
+*   **Ruby & Bundler**: For the Ruby backend.
+*   **Stripe Account**: Necessary to obtain API keys for payment processing (or use test keys).
 
-### 1. Clone the Repository
+### Setup Steps
 
-```bash
-git clone https://github.com/your-org/docai_manual_yogn4xpx.git
-cd docai_manual_yogn4xpx
+1.  **Clone the Repository:**
+    ```bash
+    git clone https://github.com/docai_smart_dkpaon23/payments-backend.git
+    cd payments-backend
+    ```
+
+2.  **Configure Environment Variables:**
+    Create a `.env` file in the root directory of the repository (or in specific backend folders if preferred) with the following variables. These are crucial for API authentication and payment gateway integration.
+
+    ```dotenv
+    API_VERSION=2.0.0
+    API_SECRET_KEY=sk_your_generated_api_key_for_backend_auth # This is your custom key for authenticating API v2 requests
+    STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key          # Get this from your Stripe dashboard
+    STRIPE_PUBLIC_KEY=pk_test_your_stripe_public_key          # Get this from your Stripe dashboard
+    ```
+    *   **`API_SECRET_KEY`**: This is a custom secret key your clients will use to authenticate requests to your `payments-backend` API. **Generate a strong, unique key.**
+    *   **`STRIPE_SECRET_KEY`**: Your secret key for the Stripe API. Found in your Stripe Dashboard.
+    *   **`STRIPE_PUBLIC_KEY`**: Your publishable key for the Stripe API. Used by the client-side.
+
+3.  **Run a Backend Server:**
+    Navigate to your preferred backend implementation and follow its specific instructions.
+
+    *   **Example (Node.js/Express):**
+        ```bash
+        cd backends/nodejs-express
+        npm install
+        npm start # or `node server.js`
+        ```
+    *   **Example (Java/Spring Boot):**
+        ```bash
+        cd backends/java-spring-boot
+        # Ensure Maven/Gradle is installed
+        ./mvnw spring-boot:run # or `gradle bootRun`
+        ```
+    *   Similar steps apply for `backends/nextjs`, `backends/python`, `backends/ruby`. Refer to their respective `README` files for precise instructions.
+
+4.  **Run a Client Example:**
+    Once a backend server is running, you can start a client to interact with it.
+
+    *   **Example (React Client):**
+        ```bash
+        cd clients/react-client
+        npm install
+        npm start
+        ```
+        This will typically open the client application in your browser (`http://localhost:3000`).
+
+    *   **Example (HTML Client):**
+        ```bash
+        cd clients/html-client
+        # You might need a simple static file server for browsers to correctly load all assets
+        # E.g., using Node.js: `npx http-server` or Python: `python -m http.server`
+        ```
+
+## 💡 Usage
+
+Interacting with the API v2.0 requires including the `X-API-Key` header with your `API_SECRET_KEY`.
+
+### Example API Request (using `curl`)
+
+Let's assume your backend is running on `http://localhost:4242`.
+
+1.  **Create a Payment Intent:**
+    ```bash
+    curl -X POST \
+      http://localhost:4242/api/v2/create-payment-intent \
+      -H 'Content-Type: application/json' \
+      -H 'X-API-Key: sk_your_generated_api_key_for_backend_auth' \
+      -d '{
+            "amount": 2000,
+            "currency": "usd"
+          }'
+    ```
+    Expected Response:
+    ```json
+    {
+      "success": true,
+      "data": {
+        "clientSecret": "pi_xxxxxxxxxxxx_secret_xxxxxxxxxxxx",
+        "publishableKey": "pk_test_xxxxxxxxxxxx",
+        "amount": 2000,
+        "currency": "usd",
+        "id": "pi_xxxxxxxxxxxx"
+      }
+    }
+    ```
+
+2.  **Retrieve Payment Intent Status:**
+    (Replace `pi_xxxxxxxxxxxx` with an actual Payment Intent ID from a previous creation)
+    ```bash
+    curl -X GET \
+      http://localhost:4242/api/v2/payment-intent/pi_xxxxxxxxxxxx \
+      -H 'X-API-Key: sk_your_generated_api_key_for_backend_auth'
+    ```
+    Expected Response:
+    ```json
+    {
+      "success": true,
+      "data": {
+        "id": "pi_xxxxxxxxxxxx",
+        "amount": 2000,
+        "currency": "usd",
+        "status": "requires_payment_method",
+        "customer": null,
+        "description": null
+      }
+    }
+    ```
+
+For a comprehensive guide on all API v2.0 endpoints, request/response structures, and migration details for existing clients, please refer to the dedicated **`API_V2_MIGRATION.md`** document.
+
+## 📁 Project Structure
+
+The repository is organized to separate backend implementations, client examples, and documentation.
+
+```
+payments-backend/
+├── .env.example                     # Example environment variables file
+├── API_V2_MIGRATION.md              # Detailed guide for API v2.0 migration
+├── README.md                        # This file
+├── backends/                        # Contains all backend server implementations
+│   ├── java-spring-boot/            # Java backend using Spring Boot
+│   │   ├── src/
+│   │   ├── pom.xml
+│   │   └── ...
+│   ├── nodejs-express/              # Node.js backend using Express
+│   │   ├── server.js
+│   │   ├── package.json
+│   │   └── ...
+│   ├── nextjs/                      # Next.js API Routes backend
+│   │   ├── pages/api/
+│   │   ├── package.json
+│   │   └── ...
+│   ├── python/                      # Python backend (e.g., Flask/Django)
+│   │   ├── app.py
+│   │   ├── requirements.txt
+│   │   └── ...
+│   └── ruby/                        # Ruby backend (e.g., Rails/Sinatra)
+│       ├── app.rb
+│       ├── Gemfile
+│       └── ...
+└── clients/                         # Contains client-side integration examples
+    ├── html-client/                 # Simple HTML/JavaScript client
+    │   ├── index.html
+    │   ├── script.js
+    │   └── style.css
+    └── react-client/                # React application client
+        ├── src/
+        ├── public/
+        ├── package.json
+        └── ...
 ```
 
-### 2. Open in Dev Container (Recommended)
+## 🌐 API Overview (v2.0)
 
-1.  Open Visual Studio Code.
-2.  Go to `File > Open Folder...` and select the `docai_manual_yogn4xpx` directory.
-3.  VS Code should automatically detect the `.devcontainer` configuration and prompt you to "Reopen in Container". Click this button.
-    *   If you don't see the prompt, open the Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P`) and select `Dev Containers: Reopen in Container`.
-4.  Docker will build (if necessary) and start the development container. This might take a few minutes on the first run as it installs all necessary dependencies for the various examples.
+API v2.0 introduces a robust and secure set of endpoints for payment processing and related operations.
 
-Once inside the container, your VS Code environment will be pre-configured with the tools, runtimes, and extensions needed for all the contained examples.
+*   **Base URL**: All v2 endpoints are prefixed with `/api/v2/`.
+*   **Authentication**:
+    *   Required Header: `X-API-Key`
+    *   Value: Your `API_SECRET_KEY` configured in the environment.
+*   **Standardized Responses**:
+    ```json
+    // Success
+    {
+      "success": true,
+      "data": { /* resource object */ }
+    }
 
-### 3. Running a Specific Example
+    // Error
+    {
+      "success": false,
+      "error": {
+        "code": "error_code_string",
+        "message": "Human-readable error message."
+      }
+    }
+    ```
 
-Each example typically resides in its own subdirectory under `.devcontainer/`. To run an example:
+### Key Endpoints
 
-1.  Navigate to the specific example's directory in the VS Code terminal (e.g., `cd .devcontainer/payment-element-server-python`).
-2.  Refer to the `README.md` (if present) within that specific example directory for detailed instructions on how to set up and run it. Generally, this will involve:
-    *   Setting up environment variables (e.g., a Stripe secret key) – often via a `.env` file.
-    *   Installing language-specific dependencies (though many will be pre-installed in the dev container).
-    *   Starting the server or client application.
+| Method | Endpoint                        | Description                                                         | Request Body                 | Response Data                 |
+| :----- | :------------------------------ | :------------------------------------------------------------------ | :--------------------------- | :---------------------------- |
+| `GET`  | `/api/v2/config`                | Retrieves client-side configuration (e.g., Stripe public key).      | None                         | `{ publishableKey: string }`  |
+| `POST` | `/api/v2/create-payment-intent` | Creates a new Payment Intent with specified amount and currency.    | `{ amount: int, currency: string }` | `{ clientSecret: string, publishableKey: string, ... }` |
+| `POST` | `/api/v2/customers`             | Creates a new customer in the payment gateway.                      | `{ email: string, name: string, ... }` | `{ id: string, email: string, ... }` |
+| `GET`  | `/api/v2/payment-intent/:id`    | Retrieves the status and details of a specific Payment Intent.      | None                         | `{ id: string, amount: int, status: string, ... }` |
+| `POST` | `/api/v2/refunds`               | Processes a refund for a payment (requires Payment Intent ID).      | `{ payment_intent_id: string, amount: int }` | `{ id: string, status: string, ... }` |
+| `GET`  | `/api/v2/orders/:id`            | Retrieves details for a specific order.                             | None                         | `{ id: string, items: [], total: int, ... }` |
 
-**Example (Python Flask Server):**
+**For a detailed changelog and migration guide from previous API versions, please see `API_V2_MIGRATION.md`.**
 
-```bash
-# In the Dev Container terminal
-cd .devcontainer/payment-element-server-python
+## 👨‍💻 Development Workflow
 
-# Install dependencies (might be pre-installed by devcontainer)
-# pip install -r requirements.txt 
+*   **Adding New Backend Implementations**:
+    *   Create a new directory under `backends/`.
+    *   Implement the API v2.0 specification, including authentication middleware.
+    *   Ensure all defined endpoints (`create-payment-intent`, `customers`, `refunds`, `orders`, `config`) are present and function correctly.
+    *   Add a `README.md` to your specific backend directory with setup and run instructions.
+*   **Contributing to Existing Backends**:
+    *   Follow the coding standards and practices of the specific language/framework.
+    *   Implement new features or bug fixes as per the API v2.0 specification.
+    *   Ensure all changes are covered by tests (if applicable) and align with the `API_V2_MIGRATION.md` documentation.
+*   **Updating Documentation**:
+    *   Any changes to the API, environment variables, or setup process should be reflected in this `README.md` and critically in `API_V2_MIGRATION.md`.
 
-# Set up .env file if required (e.g., STRIPE_SECRET_KEY=sk_test_...)
+## 📦 Key Dependencies
 
-# Run the server
-python server.py
-```
+This project leverages a variety of technologies across its different implementations:
 
-**Example (React Client):**
+*   **Backend Languages & Frameworks**:
+    *   **Node.js**: Express.js, Next.js (for API routes)
+    *   **Java**: Spring Boot
+    *   **Python**: Flask / Django (implied)
+    *   **Ruby**: Ruby on Rails / Sinatra (implied)
+*   **Payment Gateway Integration**:
+    *   Stripe SDKs (for various languages)
+*   **Frontend**:
+    *   React.js
+    *   Plain HTML/JavaScript/CSS
+*   **Build Tools**:
+    *   npm / yarn
+    *   Maven / Gradle (for Java)
+    *   pip (for Python)
+    *   Bundler (for Ruby)
 
-```bash
-# In the Dev Container terminal
-cd .devcontainer/payment-element-client-react-cra
+---
 
-# Install dependencies (might be pre-installed by devcontainer)
-# npm install 
+We welcome contributions and feedback! Please refer to the `API_V2_MIGRATION.md` for detailed information regarding the API v2.0 upgrade.
 
-# Set up .env file if required (e.g., REACT_APP_SERVER_URL=http://localhost:4242)
+---
 
-# Start the client
-npm start
-```
+## Navigation Index
+# Summary
 
-You may need to open multiple terminals in VS Code (one for the server, one for the client) if an example has both components.
+* [Home](SUMMARY.md)
 
-## Usage
+## Architecture
+* [V1.0-ARCHITECTURE](architecture/v1.0-architecture.md)
 
-This repository is designed to be a reference and learning tool:
+## Workflow
+* [V1.0-WORKFLOW](workflow/v1.0-workflow.md)
 
-*   **Explore Payment Patterns**: Study the different approaches to integrating payment flows, such as custom flows, using prebuilt components, or handling webhooks.
-*   **Language-Specific Implementations**: Find examples tailored to your preferred backend language or frontend framework.
-*   **Development Environment Setup**: Leverage the `.devcontainer` setup as a template for your own containerized development environments.
-*   **Testing and Experimentation**: Run and modify the examples to understand how different configurations and code changes impact the payment experience.
+## API
+* [API Documentation](api.md)
 
-## Project Structure
+## Documentation Info
+* Persona: **dev**
+* Generated: 2026-05-03 17:23 UTC
+## Changes
 
-The repository is structured to organize diverse examples and documentation:
+* [Introduce API v2 with Authentication and Extended Payment Features](changes/a56c0b78adda367399f1e4c8e0a94e417c6232dc-feature.md)
 
-```
-.
-├── .devcontainer/                  # Configuration for VS Code Dev Containers
-│   ├── .ssh/                       # (Optional) SSH key configuration for the container
-│   ├── custom-payment-flow-server-dotnet/
-│   ├── custom-payment-flow-server-go/
-│   ├── custom-payment-flow-server-java/
-│   ├── custom-payment-flow-server-node/
-│   ├── custom-payment-flow-server-ruby/
-│   ├── payment-element-client-react-cra/
-│   ├── payment-element-client-vue-cva/
-│   ├── payment-element-server-dotnet/
-│   ├── payment-element-server-go/
-│   ├── payment-element-server-java/
-│   ├── payment-element-server-python/  # Example: Python Flask server for Payment Elements
-│   ├── payment-element-server-ruby/
-│   ├── prebuilt-checkout-page-client-react-cra/
-│   ├── prebuilt-checkout-page-server-dotnet/
-│   ├── prebuilt-checkout-page-server-node/
-│   ├── prebuilt-checkout-page-server-python/ # Example: Python Flask server for Prebuilt Checkout
-│   └── prebuilt-checkout-page-server-ruby/
-├── docs/                           # General documentation, guides, or API references
-│   └── ...
-├── README.md                       # This file
-└── ...                             # Other potential root-level files (e.g., LICENSE)
-```
-
-**Key Directories:**
-
-*   **`.devcontainer/`**: Contains the `.devcontainer.json` files and related configurations for setting up the development environment. Each subdirectory here is typically an independent example project.
-    *   `*-server-*`: Backend examples for different payment integration types (custom, payment element, prebuilt checkout) across various languages (Python, Node.js, Go, Java, Ruby, .NET).
-    *   `*-client-*`: Frontend examples demonstrating how to integrate with the backend servers, using frameworks like React and Vue.
-*   **`docs/`**: Houses high-level documentation, tutorials, or conceptual guides related to payment integrations or the overall project.
-
-## API Overview
-
-This repository itself does not expose a single, overarching API. Instead, it demonstrates how to build and integrate with external payment provider APIs (like Stripe) through various language-specific server implementations.
-
-*   **Payment Provider API (e.g., Stripe)**: The backend examples typically interact with the payment provider's API for actions such as:
-    *   Creating payment intents or setup intents.
-    *   Confirming payments.
-    *   Handling webhooks for asynchronous payment events.
-*   **Example-Specific APIs**: Each backend server example defines its own set of REST API endpoints for the client applications to interact with. Common endpoints often include:
-    *   `POST /create-payment-intent`: To initialize a payment process.
-    *   `POST /webhook`: To receive and process events from the payment provider.
-    *   `GET /config`: To retrieve publishable keys or other client-side configuration.
-
-Refer to the specific example's documentation within its directory for precise API details.
-
-## Development Workflow
-
-1.  **Work in the Dev Container**: Always perform development within the VS Code Dev Container to ensure a consistent environment.
-2.  **Select an Example**: Choose the specific `server` and/or `client` example you want to work on.
-3.  **Local Changes**: Make code changes to the files within the chosen example's directory.
-4.  **Test**: Run the example (server and client if applicable) locally within the container and test its functionality.
-5.  **Environment Variables**: Manage sensitive information like API keys using `.env` files within each example's directory. These files should typically be excluded from version control.
-6.  **Code Style**: Adhere to the idiomatic code style of the language/framework used in each example.
-
-## Key Dependencies
-
-While the specific dependencies vary for each individual example, the core technologies and common dependencies include:
-
-*   **Payment Integration**:
-    *   `stripe`: Python package for Stripe API interaction. (Similar libraries exist for other languages in their respective examples).
-*   **Backend Frameworks**:
-    *   `Flask` (Python): A lightweight web framework used in Python examples.
-    *   Other implicit frameworks for Node.js (e.g., Express), Java (e.g., Spring Boot), Ruby (e.g., Rails/Sinatra), Go (e.g., `net/http`), and .NET (e.g., ASP.NET Core).
-*   **Environment Management**:
-    *   `dotenv`: For loading environment variables from `.env` files.
-*   **Frontend Libraries**:
-    *   `react`, `react-dom` (JavaScript/TypeScript): For React-based client examples.
-    *   `vue` (JavaScript/TypeScript): For Vue-based client examples.
-*   **Containerization**:
-    *   `Docker`: Fundamental for the Dev Container setup.
-
-## Deployment
-
-The examples in this repository are designed to showcase payment integrations, and while they can serve as a foundation for production applications, they are primarily for demonstration purposes. However, the diverse language support and use of Docker facilitate deployment to various platforms:
-
-*   **Docker**: Each server example can typically be containerized and deployed using Docker.
-*   **Cloud Providers**: Examples can be adapted for deployment to cloud platforms such as:
-    *   **AWS**: Using services like EC2, ECS, Fargate, or Lambda.
-    *   **Azure**: Using App Services, Azure Container Instances, or AKS.
-    *   **Vercel**: Frontend clients (React, Vue) are suitable for deployment to Vercel.
-
-Specific deployment instructions for each example are outside the scope of this top-level README but might be included in individual example directories.
-
-## Contributing
-
-We welcome contributions to expand the collection of examples, improve existing ones, or enhance the documentation. Please follow these general guidelines:
-
-1.  Fork the repository.
-2.  Create a new branch for your feature or bug fix.
-3.  Ensure your changes are made within the appropriate example directory or `docs/`.
-4.  If adding a new example, try to follow the existing structure (e.g., create a new directory under `.devcontainer/`).
-5.  Test your changes thoroughly within the Dev Container.
-6.  Submit a pull request with a clear description of your changes.
-
-## License
-
-(Add your project's license here, e.g., MIT, Apache 2.0, etc.)

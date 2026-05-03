@@ -1,422 +1,381 @@
-Hello fellow devs! I'm DocAI, your guide to the nitty-gritty of the `docai_manual_yogn4xpx` repository's backend. This project serves as a robust collection of payment integration examples, heavily leveraging Stripe. You'll find implementations for various payment flows across multiple languages and frameworks.
+Alright, devs! Buckle up. DocAI here, bringing you the lowdown on the shiny new API v2 for `docai_smart_dkpaon23`. This isn't just a patch; it's a full-on upgrade. We're talking mandatory API key authentication, proper versioning, and a bunch of new payment wizardry. All your existing endpoints have moved under `/api/v2/` and now demand an `X-API-Key` header.
 
-Let's dive into some of the core server-side endpoints you'll encounter, particularly in the Python/Flask examples, which are crucial for driving the client-side payment experiences.
-
----
-
-## API Overview
-
-The endpoints documented here facilitate secure payment processing via Stripe, handling everything from creating payment intents/checkout sessions to processing asynchronous webhook events. These are fundamental for any modern e-commerce or service platform requiring robust payment integration.
+Let's dive into the specifics.
 
 ---
 
-## Authentication
+## API Version 2.0 Overview
 
-All server-side interactions with the Stripe API require **Stripe Secret API Keys**. These keys grant your server applications permission to create and manage Stripe resources.
+This release (`v2.0`) introduces critical enhancements focusing on security, consistency, and expanded payment capabilities.
 
-*   **Method**: API Key in the server-side code.
-*   **Security**: Never expose your Stripe Secret API Key in client-side code. It should be loaded securely on the server, typically from environment variables, as suggested by the `.env` patterns often used with `python-dotenv`.
+*   **Base URL:** `https://api.yourdomain.com/api/v2` (Always use HTTPS)
+*   **Breaking Change:** All API requests must now be prefixed with `/api/v2/`.
+*   **Authentication:** A valid API Key is **mandatory** for *all* endpoints.
+*   **Standardized Responses:** All responses, both success and error, now follow a consistent JSON structure.
 
-    ```python
-    # Example (Python/Flask)
-    import os
-    import stripe
-    from dotenv import load_dotenv
+### Authentication
 
-    load_dotenv() # Load environment variables from .env
+All endpoints in API v2 require authentication using an API Key.
 
-    # Your Stripe secret key
-    stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
+*   **Mechanism:** Your API Secret Key must be included in every request as an `X-API-Key` HTTP header.
+*   **Where to find it:** Your `API_SECRET_KEY` is provisioned through your account dashboard or environment variables.
+*   **Security:** Treat your API Key as securely as you would your password. Do not expose it in client-side code, public repositories, or unsecured channels. Always use server-side integrations to call these endpoints.
 
-    # ... use stripe.api_key for operations
+    **Example Header:**
+    ```
+    X-API-Key: sk_live_YOUR_API_SECRET_KEY_HERE
     ```
 
----
+### Standardized Response Format
 
-## Rate Limits
+To provide a consistent experience, all API v2 responses adhere to the following JSON structures:
 
-These endpoints typically proxy calls to Stripe's API. Stripe enforces rate limits to prevent abuse and ensure stability. While your specific server might have its own limits, expect Stripe's limits to apply to the underlying API calls.
+**Success Response (HTTP 200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    // Resource-specific payload
+  },
+  "message": "Optional, human-readable success message."
+}
+```
 
-*   **Stripe API Rate Limits**: Generally, Stripe allows up to **100 read requests per second** and **100 write requests per second**. Bursts are often tolerated, but sustained high rates might lead to `429 Too Many Requests` responses from Stripe.
-*   **Best Practice**: Implement retry logic with exponential backoff for Stripe API calls in your server code to handle temporary rate limit exceedances gracefully.
+**Error Response (HTTP 4xx or 5xx):**
+```json
+{
+  "success": false,
+  "error": {
+    "code": "ERROR_CODE_STRING", // A programmatic error code
+    "message": "A human-readable description of the error.",
+    "details": {
+      // Optional: Specific validation errors or additional context
+      "field_name": "Issue with this field."
+    }
+  }
+}
+```
 
----
+### Rate Limits
 
-## SDK Guidance
+Currently, there are no strict rate limits enforced on API v2 endpoints. However, we advise against making excessive, rapid-fire requests. Implement exponential backoff for retries to handle transient network issues and to ensure fair usage. We reserve the right to introduce rate limits if abuse is detected.
 
-This repository inherently demonstrates the use of Stripe's official SDKs across various languages. When integrating these endpoints into your own applications, it is **highly recommended** to use the official Stripe SDKs for your chosen server-side language.
+### SDK Guidance
 
-*   **Benefits**:
-    *   Simplified API calls.
-    *   Automatic request signing and handling of API versions.
-    *   Built-in error handling and type safety.
-    *   Webhook signature verification utilities.
+While dedicated SDKs for API v2 are under active development, you can seamlessly interact with these endpoints using any standard HTTP client library in your preferred programming language.
 
-    **Example (Python)**:
-    ```bash
-    pip install stripe
-    ```
-
-    **Example (JavaScript/Node.js)**:
-    ```bash
-    npm install stripe
-    ```
-
-    **Example (Java)**:
-    ```xml
-    <!-- Maven -->
-    <dependency>
-      <groupId>com.stripe</groupId>
-      <artifactId>stripe-java</artifactId>
-      <version>20.x.x</version>
-    </dependency>
-    ```
-    Similar SDKs exist for Ruby, Go, PHP, .NET, etc.
+*   **Key Consideration:** Ensure your HTTP client correctly sets the `X-API-Key` header for every request.
+*   **Parsing Responses:** Always anticipate and parse the new standardized JSON response format (`success`, `data`/`error` objects).
+*   **Client Examples:** Refer to the updated `Frontend Client Examples` (HTML, React) and `Backend Server Implementations` (Java, Node.js, Next.js, Python, Ruby) within the `payments-backend` repository for practical integration patterns.
 
 ---
 
 ## Endpoints
 
-Here are some real-world endpoints likely implemented within the `docai_manual_yogn4xpx` repository, especially in the Flask-based server examples.
+Here's the breakdown of the available API v2 endpoints:
 
----
+### 1. `GET /api/v2/config`
 
-### 1. Create Payment Intent
-
-This endpoint is typically used in "Payment Element" or "Custom Payment Flow" integrations to create a `PaymentIntent` on the server-side, which is then used by the client to confirm a payment.
-
-*   **Summary**: Creates a Stripe `PaymentIntent` object. A `PaymentIntent` tracks the lifecycle of a customer's payment attempt. The `client_secret` returned by this endpoint is essential for completing the payment on the client side using Stripe.js.
-*   **Method**: `POST`
-*   **URL**: `/create-payment-intent`
-
-#### Request
-
-*   **Headers**:
-    *   `Content-Type: application/json`
-*   **Body**: JSON object containing payment details.
-
+*   **Summary:** Retrieves the essential configuration details for the payment system, such as the publishable key and default currency. This is primarily for client-side setup.
+*   **Authentication:** Required.
+*   **Request:**
+    *   **Method:** `GET`
+    *   **Path:** `/api/v2/config`
+    *   **Headers:**
+        ```
+        X-API-Key: sk_live_YOUR_API_SECRET_KEY
+        ```
+    *   **Body:** None
+*   **Example Response (200 OK):**
     ```json
     {
-      "amount": 2000,           // Required: Amount in cents/smallest currency unit (e.g., $20.00)
-      "currency": "usd",        // Required: Three-letter ISO currency code
-      "customer_id": "cus_N5dJ..." // Optional: ID of an existing Stripe Customer
-    }
-    ```
-
-#### Response
-
-*   **Status**: `200 OK` on success, `400 Bad Request` or `500 Internal Server Error` on failure.
-*   **Body**: JSON object containing the `client_secret` of the created Payment Intent, along with its `id` and `status`.
-
-    ```json
-    {
-      "client_secret": "pi_3O7gD22eRvN1nJzJ0B8sFpWj_secret_hVp0R6M...",
-      "id": "pi_3O7gD22eRvN1nJzJ0B8sFpWj",
-      "status": "requires_payment_method"
-    }
-    ```
-
-#### Example (Python/Flask Server)
-
-```python
-# .devcontainer/payment-element-server-python/server.py (Conceptual Snippet)
-from flask import Flask, jsonify, request
-import stripe
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
-
-app = Flask(__name__)
-
-@app.route('/create-payment-intent', methods=['POST'])
-def create_payment_intent():
-    try:
-        data = request.get_json()
-        amount = data['amount']
-        currency = data.get('currency', 'usd') # Default to USD
-        customer_id = data.get('customer_id')
-
-        payment_intent_params = {
-            'amount': amount,
-            'currency': currency,
-            'automatic_payment_methods': {
-                'enabled': True,
-            },
-        }
-
-        if customer_id:
-            payment_intent_params['customer'] = customer_id
-
-        payment_intent = stripe.PaymentIntent.create(**payment_intent_params)
-
-        return jsonify({
-            'client_secret': payment_intent.client_secret,
-            'id': payment_intent.id,
-            'status': payment_intent.status
-        })
-    except stripe.error.StripeError as e:
-        return jsonify(error={'message': str(e)}), 400
-    except Exception as e:
-        return jsonify(error={'message': str(e)}), 500
-
-if __name__ == '__main__':
-    app.run(port=4242)
-```
-
-#### Example (cURL Request)
-
-```bash
-curl -X POST -H "Content-Type: application/json" \
-     -d '{"amount": 2000, "currency": "usd"}' \
-     http://localhost:4242/create-payment-intent
-```
-
----
-
-### 2. Create Checkout Session
-
-This endpoint is typically used for "Prebuilt Checkout Page" integrations, where Stripe hosts the entire payment form. Your server creates a `Checkout Session`, and the client redirects the user to Stripe's hosted page.
-
-*   **Summary**: Creates a Stripe `Checkout Session` object. This session represents a customer's intention to pay for something. After creation, the client typically redirects the customer to the `session.url` to complete the payment on Stripe's hosted checkout page.
-*   **Method**: `POST`
-*   **URL**: `/create-checkout-session`
-
-#### Request
-
-*   **Headers**:
-    *   `Content-Type: application/json`
-*   **Body**: JSON object specifying line items, success/cancel URLs, and mode.
-
-    ```json
-    {
-      "items": [ // Required: List of items the customer is purchasing
-        {
-          "price_data": {
-            "currency": "usd",
-            "product_data": {
-              "name": "T-shirt",
-              "images": ["https://example.com/t-shirt.png"]
-            },
-            "unit_amount": 2000
-          },
-          "quantity": 1
-        }
-      ],
-      "success_url": "http://localhost:4242/success?session_id={CHECKOUT_SESSION_ID}", // Required: URL to redirect after successful payment
-      "cancel_url": "http://localhost:4242/cancel",                                 // Required: URL to redirect if customer cancels
-      "mode": "payment",                                                              // Required: 'payment', 'subscription', or 'setup'
-      "customer_email": "customer@example.com"                                        // Optional: Pre-fill customer email
-    }
-    ```
-
-#### Response
-
-*   **Status**: `200 OK` on success, `400 Bad Request` or `500 Internal Server Error` on failure.
-*   **Body**: JSON object containing the `session.id` and `session.url` for redirection.
-
-    ```json
-    {
-      "id": "cs_test_a1O9eFfWc...",
-      "url": "https://checkout.stripe.com/c/pay/cs_test_a1O9eFfWc..."
-    }
-    ```
-
-#### Example (Python/Flask Server)
-
-```python
-# .devcontainer/prebuilt-checkout-page-server-python/server.py (Conceptual Snippet)
-from flask import Flask, jsonify, request, redirect
-import stripe
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
-
-app = Flask(__name__)
-
-@app.route('/create-checkout-session', methods=['POST'])
-def create_checkout_session():
-    try:
-        data = request.get_json()
-        line_items = data['items']
-        success_url = data.get('success_url', 'http://localhost:4242/success?session_id={CHECKOUT_SESSION_ID}')
-        cancel_url = data.get('cancel_url', 'http://localhost:4242/cancel')
-        mode = data.get('mode', 'payment')
-        customer_email = data.get('customer_email')
-
-        checkout_session_params = {
-            'line_items': line_items,
-            'mode': mode,
-            'success_url': success_url,
-            'cancel_url': cancel_url,
-        }
-
-        if customer_email:
-            checkout_session_params['customer_email'] = customer_email
-
-        checkout_session = stripe.checkout.Session.create(**checkout_session_params)
-
-        return jsonify({'id': checkout_session.id, 'url': checkout_session.url})
-    except stripe.error.StripeError as e:
-        return jsonify(error={'message': str(e)}), 400
-    except Exception as e:
-        return jsonify(error={'message': str(e)}), 500
-
-# ... other routes like /success, /cancel
-if __name__ == '__main__':
-    app.run(port=4242)
-```
-
-#### Example (cURL Request)
-
-```bash
-curl -X POST -H "Content-Type: application/json" \
-     -d '{
-           "items": [
-             {
-               "price_data": {
-                 "currency": "usd",
-                 "product_data": { "name": "Test Item" },
-                 "unit_amount": 1500
-               },
-               "quantity": 1
-             }
-           ],
-           "success_url": "http://localhost:4242/success?session_id={CHECKOUT_SESSION_ID}",
-           "cancel_url": "http://localhost:4242/cancel",
-           "mode": "payment"
-         }' \
-     http://localhost:4242/create-checkout-session
-```
-
----
-
-### 3. Webhook Handler
-
-This endpoint is crucial for handling asynchronous events from Stripe (e.g., `payment_intent.succeeded`, `checkout.session.completed`). Stripe will send `POST` requests to this endpoint when significant events occur in your account.
-
-*   **Summary**: Receives and processes webhook events sent by Stripe. This allows your application to react to payment successes, failures, refunds, and other important lifecycle events without constant polling. **Crucially, it includes signature verification to ensure the request genuinely originated from Stripe.**
-*   **Method**: `POST`
-*   **URL**: `/webhook`
-
-#### Request
-
-*   **Headers**:
-    *   `Stripe-Signature`: Contains the timestamp and signatures used to verify the webhook's authenticity.
-*   **Body**: Raw JSON event payload from Stripe.
-
-    ```json
-    {
-      "id": "evt_12345...",
-      "object": "event",
-      "api_version": "2020-08-27",
-      "created": 1678886400,
+      "success": true,
       "data": {
-        "object": {
-          "id": "pi_12345...",
-          "object": "payment_intent",
-          "amount": 2000,
-          "currency": "usd",
-          "status": "succeeded",
-          "charges": {
-            "data": [
-              {
-                "id": "ch_12345...",
-                "status": "succeeded"
-              }
-            ]
+        "publishableKey": "pk_test_YOUR_STRIPE_PUBLISHABLE_KEY",
+        "currency": "usd"
+      }
+    }
+    ```
+*   **Example Response (401 Unauthorized):**
+    ```json
+    {
+      "success": false,
+      "error": {
+        "code": "AUTH_ERROR",
+        "message": "Authentication required. Please provide a valid X-API-Key header."
+      }
+    }
+    ```
+
+---
+
+### 2. `POST /api/v2/create-payment-intent`
+
+*   **Summary:** Creates a new Payment Intent on the server-side, which is the first step in processing a payment with Stripe. This endpoint now requires the `amount` and `currency` in the request body, and it has transitioned from a `GET` to a `POST` request.
+*   **Authentication:** Required.
+*   **Request:**
+    *   **Method:** `POST`
+    *   **Path:** `/api/v2/create-payment-intent`
+    *   **Headers:**
+        ```
+        Content-Type: application/json
+        X-API-Key: sk_live_YOUR_API_SECRET_KEY
+        ```
+    *   **Body:**
+        ```json
+        {
+          "amount": 1099,       // Required: Amount in cents (e.g., 10.99 USD)
+          "currency": "usd"     // Required: Three-letter ISO currency code (e.g., "usd", "eur")
+        }
+        ```
+*   **Example Response (200 OK):**
+    ```json
+    {
+      "success": true,
+      "data": {
+        "clientSecret": "pi_YOUR_PAYMENT_INTENT_CLIENT_SECRET_ID_secret_YOUR_SECRET"
+      },
+      "message": "Payment Intent created successfully."
+    }
+    ```
+*   **Example Response (400 Bad Request - Missing Parameters):**
+    ```json
+    {
+      "success": false,
+      "error": {
+        "code": "VALIDATION_ERROR",
+        "message": "Missing required parameters: 'amount' and 'currency' are mandatory.",
+        "details": {
+          "fields": {
+            "amount": "Amount must be a positive integer.",
+            "currency": "Currency must be a valid 3-letter ISO code."
           }
         }
-      },
-      "livemode": false,
-      "pending_webhooks": 1,
-      "request": {
-        "id": "req_ABCDE...",
-        "idempotency_key": "..."
-      },
-      "type": "payment_intent.succeeded"
+      }
     }
     ```
 
-#### Response
+---
 
-*   **Status**: `200 OK` (Always return 200 to acknowledge receipt of the event, even if you don't process it. Stripe will retry if it doesn't receive a 2xx response.)
-*   **Body**: Typically empty or a simple acknowledgement.
+### 3. `POST /api/v2/customers`
 
+*   **Summary:** Creates a new customer record in the payment system. This allows you to associate payment methods and payment intents with a specific user, enabling features like recurring payments or stored payment methods.
+*   **Authentication:** Required.
+*   **Request:**
+    *   **Method:** `POST`
+    *   **Path:** `/api/v2/customers`
+    *   **Headers:**
+        ```
+        Content-Type: application/json
+        X-API-Key: sk_live_YOUR_API_SECRET_KEY
+        ```
+    *   **Body:**
+        ```json
+        {
+          "email": "customer@example.com",     // Optional: Customer's email address
+          "name": "Jane Doe",                  // Optional: Customer's full name
+          "description": "Customer for monthly subscription" // Optional: A descriptive note for the customer
+        }
+        ```
+*   **Example Response (200 OK):**
     ```json
-    {}
+    {
+      "success": true,
+      "data": {
+        "id": "cus_YOUR_CUSTOMER_ID",
+        "email": "customer@example.com",
+        "name": "Jane Doe",
+        "created": 1678886400, // Unix timestamp
+        "livemode": false
+      },
+      "message": "Customer created successfully."
+    }
     ```
-
-#### Example (Python/Flask Server)
-
-```python
-# .devcontainer/payment-element-server-python/server.py (Conceptual Snippet)
-from flask import Flask, jsonify, request
-import stripe
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
-
-# Your Stripe webhook secret, stored securely
-STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET')
-
-app = Flask(__name__)
-
-@app.route('/webhook', methods=['POST'])
-def webhook_received():
-    event = None
-    payload = request.data
-    sig_header = request.headers.get('stripe-signature')
-
-    try:
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, STRIPE_WEBHOOK_SECRET
-        )
-    except ValueError as e:
-        # Invalid payload
-        return jsonify(error={'message': str(e)}), 400
-    except stripe.error.SignatureVerificationError as e:
-        # Invalid signature
-        return jsonify(error={'message': str(e)}), 400
-
-    # Handle the event
-    if event['type'] == 'payment_intent.succeeded':
-        payment_intent = event['data']['object'] # contains a stripe.PaymentIntent
-        print('PaymentIntent was successful for:', payment_intent['amount'], payment_intent['currency'])
-        # TODO: Fulfill the customer's order here
-    elif event['type'] == 'payment_method.attached':
-        payment_method = event['data']['object'] # contains a stripe.PaymentMethod
-        print('PaymentMethod was attached to a Customer:', payment_method['id'])
-    elif event['type'] == 'checkout.session.completed':
-        session = event['data']['object'] # contains a stripe.checkout.Session
-        print('Checkout Session completed for:', session['id'])
-        # TODO: Fulfill the customer's order here, often by retrieving full session details
-        # session = stripe.checkout.Session.retrieve(session.id, expand=['line_items'])
-    # ... handle other event types
-
-    return jsonify(success=True)
-
-if __name__ == '__main__':
-    app.run(port=4242)
-```
-
-#### Example (Stripe CLI for Testing)
-
-*   **Forward events to your local server**:
-    ```bash
-    stripe listen --forward-to localhost:4242/webhook
+*   **Example Response (400 Bad Request - Invalid Email):**
+    ```json
+    {
+      "success": false,
+      "error": {
+        "code": "VALIDATION_ERROR",
+        "message": "Invalid email format provided.",
+        "details": {
+          "fields": {
+            "email": "Must be a valid email address."
+          }
+        }
+      }
+    }
     ```
-*   **Trigger a test event**:
-    ```bash
-    stripe trigger payment_intent.succeeded
-    ```
-    This will send a `payment_intent.succeeded` event to your `/webhook` endpoint.
 
 ---
 
-This covers the essential server-side endpoints for integrating Stripe payments. Dive into the specific language folders (e.g., `./.devcontainer/payment-element-server-python`) for full, runnable examples of these implementations!
+### 4. `GET /api/v2/payment-intent/:id`
+
+*   **Summary:** Retrieves the current status and detailed information for a specific Payment Intent using its unique identifier. This is useful for checking the outcome of a payment attempt.
+*   **Authentication:** Required.
+*   **Request:**
+    *   **Method:** `GET`
+    *   **Path:** `/api/v2/payment-intent/{id}` (e.g., `/api/v2/payment-intent/pi_1234567890abcdefghijklmnop`)
+    *   **Headers:**
+        ```
+        X-API-Key: sk_live_YOUR_API_SECRET_KEY
+        ```
+    *   **Path Parameters:**
+        *   `id` (string, required): The unique identifier of the Payment Intent (e.g., `pi_12345`).
+    *   **Body:** None
+*   **Example Response (200 OK):**
+    ```json
+    {
+      "success": true,
+      "data": {
+        "id": "pi_YOUR_PAYMENT_INTENT_ID",
+        "amount": 1099,
+        "currency": "usd",
+        "status": "succeeded", // e.g., "succeeded", "requires_payment_method", "requires_confirmation"
+        "description": "Payment for order #12345",
+        "charges": {
+          "object": "list",
+          "data": [
+            {
+              "id": "ch_YOUR_CHARGE_ID",
+              "amount": 1099,
+              "currency": "usd",
+              "status": "succeeded",
+              "receipt_url": "https://pay.stripe.com/receipts/acct_YOUR_ACCT/ch_YOUR_CHARGE_ID/rcpt_YOUR_RECEIPT_ID"
+            }
+          ]
+        }
+      },
+      "message": "Payment Intent retrieved successfully."
+    }
+    ```
+*   **Example Response (404 Not Found):**
+    ```json
+    {
+      "success": false,
+      "error": {
+        "code": "NOT_FOUND",
+        "message": "Payment Intent with ID 'pi_invalid_id' not found."
+      }
+    }
+    ```
+
+---
+
+### 5. `POST /api/v2/refunds`
+
+*   **Summary:** Initiates a refund for a previously successful payment. You can specify a full or partial refund amount.
+*   **Authentication:** Required.
+*   **Request:**
+    *   **Method:** `POST`
+    *   **Path:** `/api/v2/refunds`
+    *   **Headers:**
+        ```
+        Content-Type: application/json
+        X-API-Key: sk_live_YOUR_API_SECRET_KEY
+        ```
+    *   **Body:**
+        ```json
+        {
+          "paymentIntentId": "pi_YOUR_PAYMENT_INTENT_ID", // Required: The ID of the Payment Intent to refund
+          "amount": 500,                                 // Optional: Amount in cents to refund. If omitted, full amount is refunded.
+          "reason": "duplicate_payment"                  // Optional: Reason for the refund (e.g., "duplicate_payment", "fraudulent", "requested_by_customer")
+        }
+        ```
+*   **Example Response (200 OK):**
+    ```json
+    {
+      "success": true,
+      "data": {
+        "id": "re_YOUR_REFUND_ID",
+        "amount": 500,
+        "currency": "usd",
+        "payment_intent": "pi_YOUR_PAYMENT_INTENT_ID",
+        "status": "succeeded", // or "pending", "failed"
+        "reason": "duplicate_payment"
+      },
+      "message": "Refund processed successfully."
+    }
+    ```
+*   **Example Response (400 Bad Request - Refund Failed):**
+    ```json
+    {
+      "success": false,
+      "error": {
+        "code": "REFUND_ERROR",
+        "message": "Refund failed: Insufficient funds or payment already fully refunded.",
+        "details": {
+          "reason": "The refund amount exceeds the unrefunded balance of the Payment Intent."
+        }
+      }
+    }
+    ```
+
+---
+
+### 6. `GET /api/v2/orders/:id`
+
+*   **Summary:** Retrieves the comprehensive details of a specific order using its unique ID. This includes items, total amount, shipping information, and payment intent ID.
+*   **Authentication:** Required.
+*   **Request:**
+    *   **Method:** `GET`
+    *   **Path:** `/api/v2/orders/{id}` (e.g., `/api/v2/orders/ord_YOUR_ORDER_ID_123`)
+    *   **Headers:**
+        ```
+        X-API-Key: sk_live_YOUR_API_SECRET_KEY
+        ```
+    *   **Path Parameters:**
+        *   `id` (string, required): The unique identifier of the Order (e.g., `ord_12345`).
+    *   **Body:** None
+*   **Example Response (200 OK):**
+    ```json
+    {
+      "success": true,
+      "data": {
+        "id": "ord_YOUR_ORDER_ID_123",
+        "customer_id": "cus_YOUR_CUSTOMER_ID",
+        "status": "completed", // e.g., "pending", "processing", "shipped", "completed", "cancelled"
+        "total_amount": 1099,
+        "currency": "usd",
+        "items": [
+          {
+            "item_id": "prod_SKU123",
+            "name": "Premium Widget",
+            "quantity": 1,
+            "unit_price": 999
+          },
+          {
+            "item_id": "serv_ADDON456",
+            "name": "Extended Warranty",
+            "quantity": 1,
+            "unit_price": 100
+          }
+        ],
+        "shipping_address": {
+          "line1": "123 Main St",
+          "city": "Anytown",
+          "state": "CA",
+          "postal_code": "90210",
+          "country": "US"
+        },
+        "payment_intent_id": "pi_YOUR_PAYMENT_INTENT_ID",
+        "created_at": "2023-10-27T10:00:00Z",
+        "updated_at": "2023-10-27T10:15:00Z"
+      },
+      "message": "Order details retrieved successfully."
+    }
+    ```
+*   **Example Response (404 Not Found):**
+    ```json
+    {
+      "success": false,
+      "error": {
+        "code": "NOT_FOUND",
+        "message": "Order with ID 'ord_invalid' not found."
+      }
+    }
+    ```
+
+---
+
+**IMPORTANT:** Due to the breaking changes introduced in API v2, please consult the `API_V2_MIGRATION.md` guide within the repository for detailed instructions on migrating your existing integrations. Happy coding!
