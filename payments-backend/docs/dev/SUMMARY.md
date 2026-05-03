@@ -1,222 +1,284 @@
-# docai_manual_yogn4xpx
+# docai_smart_y9708hjc: Modern Stripe Payment Integration Examples
 
-This repository, `docai_manual_yogn4xpx`, serves as a comprehensive collection of example applications and documentation for integrating various payment flows across a diverse set of programming languages and frontend frameworks. It's designed to provide developers with practical, ready-to-use samples demonstrating how to implement custom payment flows, utilize payment elements, and integrate prebuilt checkout pages.
+This repository provides a comprehensive collection of modern examples demonstrating various Stripe payment integrations across a wide array of client and server technologies. It focuses on showcasing best practices for integrating Stripe's Payment Element, building custom payment flows, and utilizing prebuilt Checkout pages. The examples are designed to be easy to set up and run, leveraging standardized development environments and modern tooling.
 
-The primary focus is on showcasing robust payment integrations (likely with a service like Stripe, given the internal dependencies) within a consistent and easily reproducible development environment facilitated by Dev Containers.
+---
 
 ## Table of Contents
 
--   [Overview](#overview)
--   [Architecture](#architecture)
--   [Getting Started](#getting-started)
--   [Usage](#usage)
--   [Project Structure](#project-structure)
--   [API Overview](#api-overview)
--   [Development Workflow](#development-workflow)
--   [Key Dependencies](#key-dependencies)
--   [Deployment](#deployment)
--   [Contributing](#contributing)
--   [License](#license)
+1.  [Overview](#overview)
+2.  [Features & Highlights](#features--highlights)
+3.  [Architecture](#architecture)
+4.  [Getting Started](#getting-started)
+    *   [Prerequisites](#prerequisites)
+    *   [Setup & Configuration](#setup--configuration)
+5.  [Usage](#usage)
+6.  [Project Structure](#project-structure)
+7.  [Stripe API Integration Overview](#stripe-api-integration-overview)
+8.  [Development Workflow](#development-workflow)
+9.  [Key Technologies & Dependencies](#key-technologies--dependencies)
+10. [Contributing](#contributing)
+11. [License](#license)
 
-## Overview
+---
 
-`docai_manual_yogn4xpx` is a monorepo containing multiple independent application examples. Each example demonstrates a specific aspect of payment integration, offering both backend server implementations and, where applicable, corresponding frontend client applications. The examples span a wide array of popular technologies, including:
+## 1. Overview
 
-*   **Backend Languages/Frameworks**: Python (Flask), Node.js, Go, Java, Ruby, .NET
-*   **Frontend Frameworks**: React, Vue
+`docai_smart_y9708hjc` is a dynamic and continuously evolving repository dedicated to providing up-to-date and practical examples for integrating Stripe payments. This repository recently underwent a significant refactoring effort to modernize existing examples, introduce new technology stacks, and standardize the development experience.
 
-The repository heavily leverages [VS Code Dev Containers](https://code.visualstudio.com/docs/devcontainers/containers) to provide a pre-configured and isolated development environment, ensuring all necessary tools and dependencies are available out-of-the-box for each example.
+The core goal is to enable developers to quickly understand and implement Stripe integrations by offering ready-to-use code snippets and full-fledged examples for popular frontend frameworks (React, Vue, plain HTML) and backend languages (Node.js, Python, Ruby, Java, Go, .NET, Next.js).
 
-## Architecture
+---
 
-The repository follows a multi-example architecture, where each subdirectory within `.devcontainer/` represents a self-contained project:
+## 2. Features & Highlights
 
-*   **Modular Examples**: Each example (e.g., `payment-element-server-python`, `payment-element-client-react-cra`) is designed to be largely independent, focusing on a specific payment integration pattern.
-*   **Client-Server Structure**: Many examples consist of a backend server (e.g., handling payment intent creation, webhooks) and a frontend client (e.g., rendering payment forms, displaying results).
-*   **Technology Diversity**: The collection highlights how to achieve similar payment goals using different technology stacks, allowing developers to choose examples relevant to their own projects.
-*   **Containerized Development**: The entire development environment is defined using `devcontainer.json` files, enabling a consistent setup across different developer machines and operating systems.
+*   **Diverse Payment Examples**:
+    *   **Stripe Payment Element**: Comprehensive examples for embedding a dynamic UI that collects payment details.
+    *   **Custom Payment Flows**: Demonstrations of building fully custom payment forms and handling payments directly.
+    *   **Prebuilt Checkout Page**: Examples for redirecting users to Stripe's hosted checkout page for a quick integration.
+*   **Multi-Technology Support**:
+    *   **Client Examples**: HTML, React (modernized with Vite), Vue (modernized with Vite).
+    *   **Server Examples**: Node.js, Python, Ruby, Java, Go, .NET, and a brand **new Next.js server example**.
+*   **Standardized Development Environment**: Utilizes `.devcontainer` configurations to provide consistent, pre-configured development environments across all supported language stacks, ensuring a smooth setup experience with tools like VS Code Dev Containers.
+*   **Modern Frontend Tooling**: React and Vue client examples now leverage [Vite](https://vitejs.dev/) for a faster and more efficient development experience.
+*   **Robust CI/CD Pipelines**: Enhanced GitHub Actions workflows ensure continuous integration and deployment, including expanded testing for various backend languages and refined Android/iOS E2E testing.
+*   **Developer Experience Focus**: The entire repository is designed with developer experience in mind, from clear example structures to consistent configuration and easy setup.
 
-## Getting Started
+---
 
-To get started with the examples in this repository, you'll primarily use VS Code Dev Containers for the best experience.
+## 3. Architecture
+
+The repository follows a client-server architecture, common for web applications:
+
+*   **Client-Side Examples**: Found primarily within the `client/` directory, these demonstrate how to integrate Stripe's client-side SDKs (e.g., Stripe.js) and handle UI interactions for collecting payment information. Examples range from plain HTML/JavaScript to modern React and Vue applications.
+*   **Server-Side Examples**: Located in the `server/` directory, these backend applications handle sensitive operations like creating PaymentIntents, processing payments, and managing webhooks securely. Each server example is built using a specific language and framework (e.g., Express for Node.js, Flask for Python, Next.js API routes).
+*   **Dev Containers (`.devcontainer/`)**: A crucial part of the architecture, these configurations define ready-to-use development environments for each language and framework. This ensures that regardless of your local machine's setup, you can launch a consistent and fully configured environment with all necessary dependencies and tools.
+*   **Categorized Examples**: The root level often categorizes examples by integration type (e.g., `payment-element`, `custom-payment-flow`, `prebuilt-checkout-page`), with subdirectories for `client` and `server` within each.
+
+This modular design allows developers to pick and choose the examples relevant to their technology stack and specific Stripe integration needs.
+
+---
+
+## 4. Getting Started
+
+Follow these steps to get a local development environment running and explore the examples.
 
 ### Prerequisites
 
-*   [**Git**](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
-*   [**Docker Desktop**](https://www.docker.com/products/docker-desktop/) (or a compatible Docker engine)
-*   [**Visual Studio Code**](https://code.visualstudio.com/)
-*   [**VS Code Dev Containers Extension**](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+Before you begin, ensure you have the following installed:
 
-### 1. Clone the Repository
+*   **Git**: For cloning the repository.
+*   **Docker Desktop**: Essential for using the `.devcontainer` setup, which provides standardized development environments.
+*   **VS Code (Recommended)**: With the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) installed for the easiest setup.
+*   **Stripe Account**: You'll need a [Stripe account](https://dashboard.stripe.com/register) to obtain API keys.
+*   **Stripe CLI**: (Optional, but highly recommended) For testing webhooks locally. Install instructions can be found [here](https://stripe.com/docs/stripe-cli).
 
-```bash
-git clone https://github.com/your-org/docai_manual_yogn4xpx.git
-cd docai_manual_yogn4xpx
-```
+### Setup & Configuration
 
-### 2. Open in Dev Container (Recommended)
+1.  **Clone the Repository**:
+    ```bash
+    git clone https://github.com/docai_smart_y9708hjc/repository-name.git
+    cd repository-name
+    ```
+    (Replace `repository-name` with the actual name if known, otherwise assume current directory)
 
-1.  Open Visual Studio Code.
-2.  Go to `File > Open Folder...` and select the `docai_manual_yogn4xpx` directory.
-3.  VS Code should automatically detect the `.devcontainer` configuration and prompt you to "Reopen in Container". Click this button.
-    *   If you don't see the prompt, open the Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P`) and select `Dev Containers: Reopen in Container`.
-4.  Docker will build (if necessary) and start the development container. This might take a few minutes on the first run as it installs all necessary dependencies for the various examples.
+2.  **Open with Dev Containers (Recommended)**:
+    *   Open the cloned repository in VS Code.
+    *   VS Code should prompt you to "Reopen in Container". Click this button.
+    *   If not prompted, open the Command Palette (Ctrl+Shift+P or Cmd+Shift+P) and select "Dev Containers: Reopen in Container".
+    *   This will build and open the project within a Docker container, providing a fully configured environment for all examples.
 
-Once inside the container, your VS Code environment will be pre-configured with the tools, runtimes, and extensions needed for all the contained examples.
+3.  **Configure Stripe API Keys**:
+    *   Copy the example environment file:
+        ```bash
+        cp .env.example .env
+        ```
+    *   Edit the newly created `.env` file and replace the placeholder values with your actual [Stripe API keys](https://dashboard.stripe.com/test/apikeys):
+        ```env
+        # .env
+        STRIPE_PUBLIC_KEY=pk_test_YOUR_STRIPE_PUBLISHABLE_KEY
+        STRIPE_SECRET_KEY=sk_test_YOUR_STRIPE_SECRET_KEY
+        # Optional: For webhook testing
+        STRIPE_WEBHOOK_SECRET=whsec_YOUR_WEBHOOK_SECRET
+        ```
+    *   You can generate a webhook secret by creating a new webhook endpoint in your [Stripe Dashboard](https://dashboard.stripe.com/test/webhooks).
 
-### 3. Running a Specific Example
+---
 
-Each example typically resides in its own subdirectory under `.devcontainer/`. To run an example:
+## 5. Usage
 
-1.  Navigate to the specific example's directory in the VS Code terminal (e.g., `cd .devcontainer/payment-element-server-python`).
-2.  Refer to the `README.md` (if present) within that specific example directory for detailed instructions on how to set up and run it. Generally, this will involve:
-    *   Setting up environment variables (e.g., a Stripe secret key) – often via a `.env` file.
-    *   Installing language-specific dependencies (though many will be pre-installed in the dev container).
-    *   Starting the server or client application.
+Each payment example typically consists of a client-side component and a corresponding server-side component.
 
-**Example (Python Flask Server):**
+To run a specific example:
 
-```bash
-# In the Dev Container terminal
-cd .devcontainer/payment-element-server-python
+1.  **Navigate to the Example Directory**:
+    Choose an integration type (e.g., `payment-element`), then select a server language (e.g., `server/node`) and a client framework (e.g., `client/react`).
+    ```bash
+    cd payment-element/server/node
+    # then in a separate terminal or split terminal
+    cd payment-element/client/react
+    ```
 
-# Install dependencies (might be pre-installed by devcontainer)
-# pip install -r requirements.txt 
+2.  **Install Dependencies (if not using Dev Containers or if changes occurred)**:
+    Within each example directory (both client and server), you might need to install dependencies. The Dev Container should handle this automatically on first build, but if you're working locally or if dependencies have changed:
+    *   **Node.js/Next.js examples**: `npm install` or `yarn install`
+    *   **Python examples**: `pip install -r requirements.txt`
+    *   **Ruby examples**: `bundle install`
+    *   **Java/Go/Dotnet examples**: Follow language-specific build commands (e.g., `mvn install`, `go mod tidy`, `dotnet restore`).
 
-# Set up .env file if required (e.g., STRIPE_SECRET_KEY=sk_test_...)
+3.  **Run the Server-Side Example**:
+    From the server example directory:
+    *   **Node.js**: `npm start`
+    *   **Python**: `python server.py` (or `flask run` if using Flask)
+    *   **Ruby**: `ruby server.rb` (or `rackup` if using Rack)
+    *   **Next.js**: `npm run dev`
+    *   Follow instructions within each specific server README for exact commands.
 
-# Run the server
-python server.py
-```
+4.  **Run the Client-Side Example**:
+    From the client example directory:
+    *   **React (Vite)**: `npm run dev`
+    *   **Vue (Vite)**: `npm run dev`
+    *   **HTML**: Open `index.html` directly in your browser or serve it with a simple static server.
 
-**Example (React Client):**
+5.  **Test Webhooks (Optional but Recommended)**:
+    If your example includes webhook handling, you can test it locally using the Stripe CLI:
+    ```bash
+    stripe listen --forward-to http://localhost:4242/webhook # Adjust port if needed
+    ```
+    This will forward webhook events from your Stripe account to your local development server. Ensure your `STRIPE_WEBHOOK_SECRET` in `.env` matches the secret generated by the CLI.
 
-```bash
-# In the Dev Container terminal
-cd .devcontainer/payment-element-client-react-cra
+---
 
-# Install dependencies (might be pre-installed by devcontainer)
-# npm install 
+## 6. Project Structure
 
-# Set up .env file if required (e.g., REACT_APP_SERVER_URL=http://localhost:4242)
-
-# Start the client
-npm start
-```
-
-You may need to open multiple terminals in VS Code (one for the server, one for the client) if an example has both components.
-
-## Usage
-
-This repository is designed to be a reference and learning tool:
-
-*   **Explore Payment Patterns**: Study the different approaches to integrating payment flows, such as custom flows, using prebuilt components, or handling webhooks.
-*   **Language-Specific Implementations**: Find examples tailored to your preferred backend language or frontend framework.
-*   **Development Environment Setup**: Leverage the `.devcontainer` setup as a template for your own containerized development environments.
-*   **Testing and Experimentation**: Run and modify the examples to understand how different configurations and code changes impact the payment experience.
-
-## Project Structure
-
-The repository is structured to organize diverse examples and documentation:
+The repository is organized to provide clear separation between different payment integration types, client technologies, and server languages.
 
 ```
 .
-├── .devcontainer/                  # Configuration for VS Code Dev Containers
-│   ├── .ssh/                       # (Optional) SSH key configuration for the container
-│   ├── custom-payment-flow-server-dotnet/
-│   ├── custom-payment-flow-server-go/
-│   ├── custom-payment-flow-server-java/
-│   ├── custom-payment-flow-server-node/
-│   ├── custom-payment-flow-server-ruby/
-│   ├── payment-element-client-react-cra/
-│   ├── payment-element-client-vue-cva/
-│   ├── payment-element-server-dotnet/
-│   ├── payment-element-server-go/
-│   ├── payment-element-server-java/
-│   ├── payment-element-server-python/  # Example: Python Flask server for Payment Elements
-│   ├── payment-element-server-ruby/
-│   ├── prebuilt-checkout-page-client-react-cra/
-│   ├── prebuilt-checkout-page-server-dotnet/
-│   ├── prebuilt-checkout-page-server-node/
-│   ├── prebuilt-checkout-page-server-python/ # Example: Python Flask server for Prebuilt Checkout
-│   └── prebuilt-checkout-page-server-ruby/
-├── docs/                           # General documentation, guides, or API references
-│   └── ...
-├── README.md                       # This file
-└── ...                             # Other potential root-level files (e.g., LICENSE)
+├── .devcontainer/                  # Standardized Dev Container configurations for various tech stacks
+├── .github/                        # GitHub Actions CI/CD workflows for testing and deployment
+│   ├── workflows/
+│       ├── build-and-test.yml
+│       └── ...
+├── client/                         # Root directory for all client-side examples
+│   ├── html/                       # Plain HTML/JS examples
+│   ├── react/                      # React examples (modernized with Vite)
+│   └── vue/                        # Vue examples (modernized with Vite)
+├── server/                         # Root directory for all server-side examples
+│   ├── dotnet/
+│   ├── go/
+│   ├── java/
+│   ├── nextjs/                     # NEW: Next.js server example for Payment Element
+│   ├── node/
+│   ├── python/
+│   └── ruby/
+├── custom-payment-flow/            # Examples demonstrating custom payment form integration
+│   ├── client/
+│   └── server/
+├── payment-element/                # Examples using Stripe's dynamic Payment Element
+│   ├── client/
+│   └── server/
+├── prebuilt-checkout-page/         # Examples for integrating with Stripe Checkout
+│   ├── client/
+│   └── server/
+├── .env.example                    # Template for environment variables
+├── .gitignore                      # Git ignore file
+├── .prettierrc.yml                 # Prettier configuration for code formatting
+└── main.tf                         # (Potentially Terraform configuration for infrastructure)
+└── README.md                       # This file
 ```
 
-**Key Directories:**
+---
 
-*   **`.devcontainer/`**: Contains the `.devcontainer.json` files and related configurations for setting up the development environment. Each subdirectory here is typically an independent example project.
-    *   `*-server-*`: Backend examples for different payment integration types (custom, payment element, prebuilt checkout) across various languages (Python, Node.js, Go, Java, Ruby, .NET).
-    *   `*-client-*`: Frontend examples demonstrating how to integrate with the backend servers, using frameworks like React and Vue.
-*   **`docs/`**: Houses high-level documentation, tutorials, or conceptual guides related to payment integrations or the overall project.
+## 7. Stripe API Integration Overview
 
-## API Overview
+The examples primarily demonstrate the following core Stripe API concepts:
 
-This repository itself does not expose a single, overarching API. Instead, it demonstrates how to build and integrate with external payment provider APIs (like Stripe) through various language-specific server implementations.
+*   **PaymentIntents**: The fundamental API object for creating and tracking the lifecycle of a payment. Server-side examples often create a `PaymentIntent` and pass its `client_secret` to the client for confirmation.
+*   **Stripe.js**: The client-side JavaScript library that tokenizes payment information, confirms PaymentIntents, and handles 3D Secure authentication.
+*   **Payment Element**: A dynamic UI component provided by Stripe.js that automatically collects payment details and adapts to different payment methods.
+*   **Webhooks**: Server-side endpoints configured to receive asynchronous event notifications from Stripe (e.g., `payment_intent.succeeded`, `checkout.session.completed`). This is crucial for securely updating your database and fulfilling orders.
+*   **Stripe Checkout**: Stripe's prebuilt, hosted payment page that simplifies integration for basic payment flows.
 
-*   **Payment Provider API (e.g., Stripe)**: The backend examples typically interact with the payment provider's API for actions such as:
-    *   Creating payment intents or setup intents.
-    *   Confirming payments.
-    *   Handling webhooks for asynchronous payment events.
-*   **Example-Specific APIs**: Each backend server example defines its own set of REST API endpoints for the client applications to interact with. Common endpoints often include:
-    *   `POST /create-payment-intent`: To initialize a payment process.
-    *   `POST /webhook`: To receive and process events from the payment provider.
-    *   `GET /config`: To retrieve publishable keys or other client-side configuration.
+Each example is self-contained and illustrates these concepts in the context of a specific language/framework pairing.
 
-Refer to the specific example's documentation within its directory for precise API details.
+---
 
-## Development Workflow
+## 8. Development Workflow
 
-1.  **Work in the Dev Container**: Always perform development within the VS Code Dev Container to ensure a consistent environment.
-2.  **Select an Example**: Choose the specific `server` and/or `client` example you want to work on.
-3.  **Local Changes**: Make code changes to the files within the chosen example's directory.
-4.  **Test**: Run the example (server and client if applicable) locally within the container and test its functionality.
-5.  **Environment Variables**: Manage sensitive information like API keys using `.env` files within each example's directory. These files should typically be excluded from version control.
-6.  **Code Style**: Adhere to the idiomatic code style of the language/framework used in each example.
+The recommended development workflow for this repository emphasizes consistency and ease of setup:
 
-## Key Dependencies
+1.  **Use Dev Containers**: Leverage the `.devcontainer` setup in VS Code to ensure a consistent and fully configured development environment. This eliminates "it works on my machine" issues.
+2.  **Select an Example**: Navigate to the specific `client` and `server` pair you wish to work on.
+3.  **Code and Test**: Make your changes, run local tests (if provided), and manually test the integration by running the client and server.
+4.  **Formatting**: Ensure your code adheres to the project's formatting standards using `prettier` (configured in `.prettierrc.yml`).
+5.  **CI/CD**: Changes pushed to the repository will trigger GitHub Actions workflows to build, test, and validate the examples across various environments.
 
-While the specific dependencies vary for each individual example, the core technologies and common dependencies include:
+---
 
-*   **Payment Integration**:
-    *   `stripe`: Python package for Stripe API interaction. (Similar libraries exist for other languages in their respective examples).
-*   **Backend Frameworks**:
-    *   `Flask` (Python): A lightweight web framework used in Python examples.
-    *   Other implicit frameworks for Node.js (e.g., Express), Java (e.g., Spring Boot), Ruby (e.g., Rails/Sinatra), Go (e.g., `net/http`), and .NET (e.g., ASP.NET Core).
-*   **Environment Management**:
-    *   `dotenv`: For loading environment variables from `.env` files.
-*   **Frontend Libraries**:
-    *   `react`, `react-dom` (JavaScript/TypeScript): For React-based client examples.
-    *   `vue` (JavaScript/TypeScript): For Vue-based client examples.
-*   **Containerization**:
-    *   `Docker`: Fundamental for the Dev Container setup.
+## 9. Key Technologies & Dependencies
 
-## Deployment
+This repository showcases a broad range of modern technologies:
 
-The examples in this repository are designed to showcase payment integrations, and while they can serve as a foundation for production applications, they are primarily for demonstration purposes. However, the diverse language support and use of Docker facilitate deployment to various platforms:
+*   **Frontend**:
+    *   React (with Vite)
+    *   Vue.js (with Vite)
+    *   Plain HTML, CSS, JavaScript
+*   **Backend**:
+    *   Node.js (Express.js)
+    *   Python (Flask)
+    *   Ruby (Sinatra)
+    *   Java (Spring Boot)
+    *   Go (net/http)
+    *   .NET (ASP.NET Core)
+    *   Next.js (for full-stack capabilities)
+*   **Tools**:
+    *   Docker & VS Code Dev Containers
+    *   Vite (for React/Vue build processes)
+    *   Prettier (code formatting)
+    *   GitHub Actions (CI/CD)
+    *   Stripe CLI
 
-*   **Docker**: Each server example can typically be containerized and deployed using Docker.
-*   **Cloud Providers**: Examples can be adapted for deployment to cloud platforms such as:
-    *   **AWS**: Using services like EC2, ECS, Fargate, or Lambda.
-    *   **Azure**: Using App Services, Azure Container Instances, or AKS.
-    *   **Vercel**: Frontend clients (React, Vue) are suitable for deployment to Vercel.
+---
 
-Specific deployment instructions for each example are outside the scope of this top-level README but might be included in individual example directories.
+## 10. Contributing
 
-## Contributing
-
-We welcome contributions to expand the collection of examples, improve existing ones, or enhance the documentation. Please follow these general guidelines:
+We welcome contributions to expand and improve these examples! If you'd like to contribute:
 
 1.  Fork the repository.
-2.  Create a new branch for your feature or bug fix.
-3.  Ensure your changes are made within the appropriate example directory or `docs/`.
-4.  If adding a new example, try to follow the existing structure (e.g., create a new directory under `.devcontainer/`).
-5.  Test your changes thoroughly within the Dev Container.
-6.  Submit a pull request with a clear description of your changes.
+2.  Create a new branch (`git checkout -b feature/your-feature-name`).
+3.  Implement your changes, adhering to existing code style and best practices.
+4.  Write clear, concise commit messages.
+5.  Push your branch (`git push origin feature/your-feature-name`).
+6.  Open a Pull Request, describing your changes and their benefits.
 
-## License
+---
 
-(Add your project's license here, e.g., MIT, Apache 2.0, etc.)
+## 11. License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+(Note: Assuming MIT License, as is common for example repos. If there's an actual `LICENSE` file, link to that.)
+
+---
+
+## Navigation Index
+# Summary
+
+* [Home](SUMMARY.md)
+
+## Architecture
+* [V1.0-ARCHITECTURE](architecture/v1.0-architecture.md)
+
+## Workflow
+* [V1.0-WORKFLOW](workflow/v1.0-workflow.md)
+
+## API
+* [API Documentation](api.md)
+
+## Documentation Info
+* Persona: **dev**
+* Generated: 2026-05-03 17:07 UTC
+## Changes
+
+* [Comprehensive Refactor and Expansion of Payment Examples & Dev Environment](changes/c13b2a30963e05d07aae9ad6b985f72ad0250266-refactor.md)
+

@@ -1,322 +1,112 @@
-Hello fellow devs! I'm DocAI, your guide to the nitty-gritty of the `docai_manual_yogn4xpx` repository's backend. This project serves as a robust collection of payment integration examples, heavily leveraging Stripe. You'll find implementations for various payment flows across multiple languages and frameworks.
+As DocAI, your expert API writer, I'm analyzing the `docai_smart_y9708hjc` repository based on the recent "Comprehensive Refactor and Expansion of Payment Examples & Dev Environment" commit.
 
-Let's dive into some of the core server-side endpoints you'll encounter, particularly in the Python/Flask examples, which are crucial for driving the client-side payment experiences.
+It's important to clarify: this repository does not expose a unified public API for its own functionality. Instead, it provides a comprehensive suite of **example applications** demonstrating how to integrate Stripe's Payment Element, Custom Payment Flows, and Prebuilt Checkout Pages across various server-side technologies (Node.js, Python, Ruby, Java, Go, .NET, and a new Next.js example) and modern frontend frameworks (React with Vite, Vue with Vite, plain HTML).
 
----
-
-## API Overview
-
-The endpoints documented here facilitate secure payment processing via Stripe, handling everything from creating payment intents/checkout sessions to processing asynchronous webhook events. These are fundamental for any modern e-commerce or service platform requiring robust payment integration.
+The endpoints documented below represent the **common API route patterns** that these example applications implement on their respective backends. Your client-side applications (e.g., the React or Vue examples in this repo) would interact with these custom backend endpoints, which then, in turn, leverage the Stripe API on the server.
 
 ---
 
-## Authentication
+### **Overview of Example API Endpoint Patterns**
 
-All server-side interactions with the Stripe API require **Stripe Secret API Keys**. These keys grant your server applications permission to create and manage Stripe resources.
-
-*   **Method**: API Key in the server-side code.
-*   **Security**: Never expose your Stripe Secret API Key in client-side code. It should be loaded securely on the server, typically from environment variables, as suggested by the `.env` patterns often used with `python-dotenv`.
-
-    ```python
-    # Example (Python/Flask)
-    import os
-    import stripe
-    from dotenv import load_dotenv
-
-    load_dotenv() # Load environment variables from .env
-
-    # Your Stripe secret key
-    stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
-
-    # ... use stripe.api_key for operations
-    ```
+The repository's examples generally expose two primary server-side endpoints to facilitate Stripe Payment Element and Custom Payment Flow integrations: one for initializing a payment intent, and another for securely handling asynchronous webhook events from Stripe.
 
 ---
 
-## Rate Limits
+### **1. Create Payment Intent**
 
-These endpoints typically proxy calls to Stripe's API. Stripe enforces rate limits to prevent abuse and ensure stability. While your specific server might have its own limits, expect Stripe's limits to apply to the underlying API calls.
+This endpoint is responsible for creating a `PaymentIntent` object on the Stripe API and returning its `client_secret` to the frontend. The `client_secret` is essential for the Stripe.js library to securely collect payment details and confirm payments on the client side without exposing your secret API keys.
 
-*   **Stripe API Rate Limits**: Generally, Stripe allows up to **100 read requests per second** and **100 write requests per second**. Bursts are often tolerated, but sustained high rates might lead to `429 Too Many Requests` responses from Stripe.
-*   **Best Practice**: Implement retry logic with exponential backoff for Stripe API calls in your server code to handle temporary rate limit exceedances gracefully.
+*   **Summary:** Initiates a new payment transaction by creating a Stripe `PaymentIntent` object on your server. It returns the `client_secret` needed by your frontend to complete the payment securely.
+*   **Method:** `POST`
+*   **Example Paths (varies by language/framework):**
+    *   `/create-payment-intent` (Common in many server examples)
+    *   `/api/create-payment-intent` (Typical for Next.js API routes)
 
----
-
-## SDK Guidance
-
-This repository inherently demonstrates the use of Stripe's official SDKs across various languages. When integrating these endpoints into your own applications, it is **highly recommended** to use the official Stripe SDKs for your chosen server-side language.
-
-*   **Benefits**:
-    *   Simplified API calls.
-    *   Automatic request signing and handling of API versions.
-    *   Built-in error handling and type safety.
-    *   Webhook signature verification utilities.
-
-    **Example (Python)**:
-    ```bash
-    pip install stripe
-    ```
-
-    **Example (JavaScript/Node.js)**:
-    ```bash
-    npm install stripe
-    ```
-
-    **Example (Java)**:
-    ```xml
-    <!-- Maven -->
-    <dependency>
-      <groupId>com.stripe</groupId>
-      <artifactId>stripe-java</artifactId>
-      <version>20.x.x</version>
-    </dependency>
-    ```
-    Similar SDKs exist for Ruby, Go, PHP, .NET, etc.
-
----
-
-## Endpoints
-
-Here are some real-world endpoints likely implemented within the `docai_manual_yogn4xpx` repository, especially in the Flask-based server examples.
-
----
-
-### 1. Create Payment Intent
-
-This endpoint is typically used in "Payment Element" or "Custom Payment Flow" integrations to create a `PaymentIntent` on the server-side, which is then used by the client to confirm a payment.
-
-*   **Summary**: Creates a Stripe `PaymentIntent` object. A `PaymentIntent` tracks the lifecycle of a customer's payment attempt. The `client_secret` returned by this endpoint is essential for completing the payment on the client side using Stripe.js.
-*   **Method**: `POST`
-*   **URL**: `/create-payment-intent`
-
-#### Request
-
-*   **Headers**:
-    *   `Content-Type: application/json`
-*   **Body**: JSON object containing payment details.
-
+*   **Request Body Example:**
     ```json
     {
-      "amount": 2000,           // Required: Amount in cents/smallest currency unit (e.g., $20.00)
-      "currency": "usd",        // Required: Three-letter ISO currency code
-      "customer_id": "cus_N5dJ..." // Optional: ID of an existing Stripe Customer
+      "amount": 2000,
+      "currency": "usd",
+      "payment_method_types": ["card", "us_bank_account"] // Optional: specify payment methods
+      // Additional parameters might be passed, e.g., "customer_id", "metadata"
     }
     ```
+    *   **`amount`** (integer, required): The amount to charge in the smallest currency unit (e.g., 2000 for $20.00 USD).
+    *   **`currency`** (string, required): Three-letter ISO currency code (e.g., "usd", "eur").
+    *   **`payment_method_types`** (array of strings, optional): An array of payment method types that this PaymentIntent is allowed to use. Defaults to `["card"]`.
 
-#### Response
-
-*   **Status**: `200 OK` on success, `400 Bad Request` or `500 Internal Server Error` on failure.
-*   **Body**: JSON object containing the `client_secret` of the created Payment Intent, along with its `id` and `status`.
-
+*   **Response Body Example:**
     ```json
     {
-      "client_secret": "pi_3O7gD22eRvN1nJzJ0B8sFpWj_secret_hVp0R6M...",
-      "id": "pi_3O7gD22eRvN1nJzJ0B8sFpWj",
+      "clientSecret": "pi_XXXXXXXXXXXXXXXXXXXXXXXX_secret_YYYYYYYYYYYYYYYYYYYYYYYY",
+      "publishableKey": "pk_test_XXXXXXXXXXXXXXXXXXXXXXXX",
       "status": "requires_payment_method"
+      // Other relevant PaymentIntent fields may be included for debugging or information
     }
     ```
+    *   **`clientSecret`** (string): The client secret of the created PaymentIntent. This is critical for the frontend to interact with the PaymentIntent.
+    *   **`publishableKey`** (string): Your Stripe publishable API key, used by the frontend for initializing Stripe.js.
+    *   **`status`** (string): The current status of the PaymentIntent (e.g., `requires_payment_method`, `succeeded`).
 
-#### Example (Python/Flask Server)
+*   **Authentication:**
+    *   **Server-Side:** The example server-side code authenticates with Stripe using your **secret API key**. This key should be kept strictly confidential and should never be exposed to the client.
+    *   **Example Endpoints:** For simplicity, these example endpoints typically do not implement user authentication. In a production application, you would secure this endpoint to prevent unauthorized PaymentIntent creation (e.g., requiring user authentication for purchase requests).
 
-```python
-# .devcontainer/payment-element-server-python/server.py (Conceptual Snippet)
-from flask import Flask, jsonify, request
-import stripe
-import os
-from dotenv import load_dotenv
+*   **Rate Limits:**
+    *   These example endpoints do not have explicit rate limits configured within the repository code.
+    *   **Stripe API:** Be mindful of Stripe's own API rate limits when your application scales. Design your backend to handle these limits appropriately.
 
-load_dotenv()
-stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
+*   **SDK Guidance:**
+    *   **Frontend (Stripe.js):** Your frontend uses the `publishableKey` to load `Stripe.js` and the `clientSecret` to initialize the Payment Element and confirm the payment.
+        ```javascript
+        import { loadStripe } from '@stripe/stripe-js';
 
-app = Flask(__name__)
+        async function initializeAndDisplayPayment() {
+          const response = await fetch('/create-payment-intent', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ amount: 1099, currency: 'usd' })
+          });
+          const { clientSecret, publishableKey } = await response.json();
 
-@app.route('/create-payment-intent', methods=['POST'])
-def create_payment_intent():
-    try:
-        data = request.get_json()
-        amount = data['amount']
-        currency = data.get('currency', 'usd') # Default to USD
-        customer_id = data.get('customer_id')
+          const stripe = await loadStripe(publishableKey);
+          const elements = stripe.elements({ clientSecret });
+          const paymentElement = elements.create('payment');
+          paymentElement.mount('#payment-element');
 
-        payment_intent_params = {
-            'amount': amount,
-            'currency': currency,
-            'automatic_payment_methods': {
-                'enabled': True,
-            },
+          // To confirm payment later (e.g., on form submission):
+          // const { error } = await stripe.confirmPayment({
+          //   elements,
+          //   confirmParams: {
+          //     return_url: 'https://your-domain.com/payment-complete',
+          //   }
+          // });
         }
-
-        if customer_id:
-            payment_intent_params['customer'] = customer_id
-
-        payment_intent = stripe.PaymentIntent.create(**payment_intent_params)
-
-        return jsonify({
-            'client_secret': payment_intent.client_secret,
-            'id': payment_intent.id,
-            'status': payment_intent.status
-        })
-    except stripe.error.StripeError as e:
-        return jsonify(error={'message': str(e)}), 400
-    except Exception as e:
-        return jsonify(error={'message': str(e)}), 500
-
-if __name__ == '__main__':
-    app.run(port=4242)
-```
-
-#### Example (cURL Request)
-
-```bash
-curl -X POST -H "Content-Type: application/json" \
-     -d '{"amount": 2000, "currency": "usd"}' \
-     http://localhost:4242/create-payment-intent
-```
+        ```
+    *   **Backend (Example Server Code):** The server implementations (e.g., Node.js, Python, Java) utilize the respective Stripe server-side SDKs (`stripe-node`, `stripe-python`, etc.) to call `stripe.paymentIntents.create()`.
 
 ---
 
-### 2. Create Checkout Session
+### **2. Webhook Listener**
 
-This endpoint is typically used for "Prebuilt Checkout Page" integrations, where Stripe hosts the entire payment form. Your server creates a `Checkout Session`, and the client redirects the user to Stripe's hosted page.
+This endpoint is absolutely critical for handling asynchronous events from Stripe. After a payment is confirmed, fails, or other significant events occur (like refunds or subscription changes), Stripe sends an event notification to this endpoint. This allows your backend to securely react to these events, update order statuses, fulfill goods, send receipts, and handle other post-payment logic without relying on potentially unreliable client-side responses.
 
-*   **Summary**: Creates a Stripe `Checkout Session` object. This session represents a customer's intention to pay for something. After creation, the client typically redirects the customer to the `session.url` to complete the payment on Stripe's hosted checkout page.
-*   **Method**: `POST`
-*   **URL**: `/create-checkout-session`
+*   **Summary:** Receives and processes event notifications sent by Stripe, allowing your server to react reliably to changes in payment status and other critical lifecycle events.
+*   **Method:** `POST`
+*   **Example Paths (varies by language/framework):**
+    *   `/webhook` (Common in many server examples)
+    *   `/api/webhook` (Typical for Next.js API routes)
 
-#### Request
-
-*   **Headers**:
-    *   `Content-Type: application/json`
-*   **Body**: JSON object specifying line items, success/cancel URLs, and mode.
-
+*   **Request Body Example:** A Stripe `Event` object, containing detailed information about the event that occurred.
     ```json
     {
-      "items": [ // Required: List of items the customer is purchasing
-        {
-          "price_data": {
-            "currency": "usd",
-            "product_data": {
-              "name": "T-shirt",
-              "images": ["https://example.com/t-shirt.png"]
-            },
-            "unit_amount": 2000
-          },
-          "quantity": 1
-        }
-      ],
-      "success_url": "http://localhost:4242/success?session_id={CHECKOUT_SESSION_ID}", // Required: URL to redirect after successful payment
-      "cancel_url": "http://localhost:4242/cancel",                                 // Required: URL to redirect if customer cancels
-      "mode": "payment",                                                              // Required: 'payment', 'subscription', or 'setup'
-      "customer_email": "customer@example.com"                                        // Optional: Pre-fill customer email
-    }
-    ```
-
-#### Response
-
-*   **Status**: `200 OK` on success, `400 Bad Request` or `500 Internal Server Error` on failure.
-*   **Body**: JSON object containing the `session.id` and `session.url` for redirection.
-
-    ```json
-    {
-      "id": "cs_test_a1O9eFfWc...",
-      "url": "https://checkout.stripe.com/c/pay/cs_test_a1O9eFfWc..."
-    }
-    ```
-
-#### Example (Python/Flask Server)
-
-```python
-# .devcontainer/prebuilt-checkout-page-server-python/server.py (Conceptual Snippet)
-from flask import Flask, jsonify, request, redirect
-import stripe
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
-
-app = Flask(__name__)
-
-@app.route('/create-checkout-session', methods=['POST'])
-def create_checkout_session():
-    try:
-        data = request.get_json()
-        line_items = data['items']
-        success_url = data.get('success_url', 'http://localhost:4242/success?session_id={CHECKOUT_SESSION_ID}')
-        cancel_url = data.get('cancel_url', 'http://localhost:4242/cancel')
-        mode = data.get('mode', 'payment')
-        customer_email = data.get('customer_email')
-
-        checkout_session_params = {
-            'line_items': line_items,
-            'mode': mode,
-            'success_url': success_url,
-            'cancel_url': cancel_url,
-        }
-
-        if customer_email:
-            checkout_session_params['customer_email'] = customer_email
-
-        checkout_session = stripe.checkout.Session.create(**checkout_session_params)
-
-        return jsonify({'id': checkout_session.id, 'url': checkout_session.url})
-    except stripe.error.StripeError as e:
-        return jsonify(error={'message': str(e)}), 400
-    except Exception as e:
-        return jsonify(error={'message': str(e)}), 500
-
-# ... other routes like /success, /cancel
-if __name__ == '__main__':
-    app.run(port=4242)
-```
-
-#### Example (cURL Request)
-
-```bash
-curl -X POST -H "Content-Type: application/json" \
-     -d '{
-           "items": [
-             {
-               "price_data": {
-                 "currency": "usd",
-                 "product_data": { "name": "Test Item" },
-                 "unit_amount": 1500
-               },
-               "quantity": 1
-             }
-           ],
-           "success_url": "http://localhost:4242/success?session_id={CHECKOUT_SESSION_ID}",
-           "cancel_url": "http://localhost:4242/cancel",
-           "mode": "payment"
-         }' \
-     http://localhost:4242/create-checkout-session
-```
-
----
-
-### 3. Webhook Handler
-
-This endpoint is crucial for handling asynchronous events from Stripe (e.g., `payment_intent.succeeded`, `checkout.session.completed`). Stripe will send `POST` requests to this endpoint when significant events occur in your account.
-
-*   **Summary**: Receives and processes webhook events sent by Stripe. This allows your application to react to payment successes, failures, refunds, and other important lifecycle events without constant polling. **Crucially, it includes signature verification to ensure the request genuinely originated from Stripe.**
-*   **Method**: `POST`
-*   **URL**: `/webhook`
-
-#### Request
-
-*   **Headers**:
-    *   `Stripe-Signature`: Contains the timestamp and signatures used to verify the webhook's authenticity.
-*   **Body**: Raw JSON event payload from Stripe.
-
-    ```json
-    {
-      "id": "evt_12345...",
+      "id": "evt_XXXXXXXXXXXXXXXXXXXXXXXX",
       "object": "event",
       "api_version": "2020-08-27",
       "created": 1678886400,
       "data": {
         "object": {
-          "id": "pi_12345...",
+          "id": "pi_YYYYYYYYYYYYYYYYYYYYYYYY",
           "object": "payment_intent",
           "amount": 2000,
           "currency": "usd",
@@ -324,7 +114,8 @@ This endpoint is crucial for handling asynchronous events from Stripe (e.g., `pa
           "charges": {
             "data": [
               {
-                "id": "ch_12345...",
+                "id": "ch_ZZZZZZZZZZZZZZZZZZZZZZZZ",
+                "object": "charge",
                 "status": "succeeded"
               }
             ]
@@ -333,90 +124,67 @@ This endpoint is crucial for handling asynchronous events from Stripe (e.g., `pa
       },
       "livemode": false,
       "pending_webhooks": 1,
-      "request": {
-        "id": "req_ABCDE...",
-        "idempotency_key": "..."
-      },
-      "type": "payment_intent.succeeded"
+      "request": { "id": "req_AAAAAAAAAAAAAAAAAAAAAAAA" },
+      "type": "payment_intent.succeeded" // Key event type
     }
     ```
+    *   The `type` field (e.g., `payment_intent.succeeded`, `checkout.session.completed`, `charge.succeeded`) indicates the specific event that triggered the webhook.
+    *   The `data.object` field contains the relevant Stripe object (e.g., `PaymentIntent`, `Charge`, `CheckoutSession`) associated with the event.
 
-#### Response
-
-*   **Status**: `200 OK` (Always return 200 to acknowledge receipt of the event, even if you don't process it. Stripe will retry if it doesn't receive a 2xx response.)
-*   **Body**: Typically empty or a simple acknowledgement.
-
-    ```json
-    {}
+*   **Response Body Example:** An empty `200 OK` response.
     ```
-
-#### Example (Python/Flask Server)
-
-```python
-# .devcontainer/payment-element-server-python/server.py (Conceptual Snippet)
-from flask import Flask, jsonify, request
-import stripe
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
-
-# Your Stripe webhook secret, stored securely
-STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET')
-
-app = Flask(__name__)
-
-@app.route('/webhook', methods=['POST'])
-def webhook_received():
-    event = None
-    payload = request.data
-    sig_header = request.headers.get('stripe-signature')
-
-    try:
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, STRIPE_WEBHOOK_SECRET
-        )
-    except ValueError as e:
-        # Invalid payload
-        return jsonify(error={'message': str(e)}), 400
-    except stripe.error.SignatureVerificationError as e:
-        # Invalid signature
-        return jsonify(error={'message': str(e)}), 400
-
-    # Handle the event
-    if event['type'] == 'payment_intent.succeeded':
-        payment_intent = event['data']['object'] # contains a stripe.PaymentIntent
-        print('PaymentIntent was successful for:', payment_intent['amount'], payment_intent['currency'])
-        # TODO: Fulfill the customer's order here
-    elif event['type'] == 'payment_method.attached':
-        payment_method = event['data']['object'] # contains a stripe.PaymentMethod
-        print('PaymentMethod was attached to a Customer:', payment_method['id'])
-    elif event['type'] == 'checkout.session.completed':
-        session = event['data']['object'] # contains a stripe.checkout.Session
-        print('Checkout Session completed for:', session['id'])
-        # TODO: Fulfill the customer's order here, often by retrieving full session details
-        # session = stripe.checkout.Session.retrieve(session.id, expand=['line_items'])
-    # ... handle other event types
-
-    return jsonify(success=True)
-
-if __name__ == '__main__':
-    app.run(port=4242)
-```
-
-#### Example (Stripe CLI for Testing)
-
-*   **Forward events to your local server**:
-    ```bash
-    stripe listen --forward-to localhost:4242/webhook
+    (No content, HTTP Status 200)
     ```
-*   **Trigger a test event**:
-    ```bash
-    stripe trigger payment_intent.succeeded
-    ```
-    This will send a `payment_intent.succeeded` event to your `/webhook` endpoint.
+    *   Responding with a `2xx` status code within a reasonable time (typically 30 seconds) tells Stripe you successfully received the event. Anything else may cause Stripe to retry the delivery.
+
+*   **Authentication:**
+    *   **Webhook Signature Verification:** This is absolutely critical for security. Stripe sends a `Stripe-Signature` header with each webhook event. The example server code demonstrates how to verify this signature using your **webhook secret** (obtained from your Stripe dashboard) to ensure the event genuinely originated from Stripe and hasn't been tampered with by a malicious third party.
+    *   **Never process webhook events without verifying the signature.**
+
+*   **Rate Limits:**
+    *   These example endpoints do not enforce explicit rate limits.
+    *   **Stripe Webhooks:** Stripe has its own internal mechanisms for retrying webhook deliveries if your endpoint doesn't respond. Design your webhook handler to be idempotent (processing the same event multiple times has the same outcome) and efficient, or offload complex processing to a background job/queue to ensure a quick response.
+
+*   **SDK Guidance:**
+    *   **Backend (Example Server Code):** The server-side examples utilize the Stripe SDK's webhook construction methods to parse the raw request body and verify the signature against your endpoint secret.
+        ```javascript
+        // Example for Node.js (using Express)
+        const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+        const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET; // Your webhook secret
+
+        app.post('/webhook', express.raw({ type: 'application/json' }), (request, response) => {
+          const signature = request.headers['stripe-signature'];
+          let event;
+
+          try {
+            event = stripe.webhooks.constructEvent(request.body, signature, webhookSecret);
+          } catch (err) {
+            console.error(`Webhook signature verification failed: ${err.message}`);
+            return response.sendStatus(400); // Invalid signature
+          }
+
+          // Handle the event based on its type
+          switch (event.type) {
+            case 'payment_intent.succeeded':
+              const paymentIntent = event.data.object;
+              console.log(`PaymentIntent ${paymentIntent.id} succeeded for ${paymentIntent.amount}!`);
+              // ✅ Implement your business logic here (e.g., fulfill order, update database, send confirmation email)
+              break;
+            case 'payment_intent.payment_failed':
+              const failedPaymentIntent = event.data.object;
+              console.log(`PaymentIntent ${failedPaymentIntent.id} failed: ${failedPaymentIntent.last_payment_error.message}`);
+              // ⚠️ Handle failed payment (e.g., notify user, log error, retry payment)
+              break;
+            // ... handle other relevant event types (e.g., 'charge.succeeded', 'checkout.session.completed')
+            default:
+              console.log(`Unhandled event type ${event.type}.`);
+          }
+
+          // Respond with a 200 to acknowledge successful receipt of the event
+          response.sendStatus(200);
+        });
+        ```
 
 ---
 
-This covers the essential server-side endpoints for integrating Stripe payments. Dive into the specific language folders (e.g., `./.devcontainer/payment-element-server-python`) for full, runnable examples of these implementations!
+The comprehensive refactor outlined in the commit provides developers with these robust example patterns in multiple languages and frameworks, significantly improving the utility and developer experience for building modern Stripe integrations. The introduction of the Next.js server example and modernization with Vite tooling are particularly valuable for contemporary full-stack development.

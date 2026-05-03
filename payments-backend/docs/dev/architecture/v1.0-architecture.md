@@ -3,19 +3,16 @@
 ## System Overview
 
 ```
-+----------------+       +-----------------------------------------+       +----------------------------+
-|                |       |                                         |       |                            |
-|    Frontend    <----->| payment-element/server/python/server.py |<----->|          Database          |
-|  (Detected)    |       |                (Utility)                |       |      (None detected)       |
-|                |       |                (Flask)                  |       |                            |
-+----------------+       +-----------------------------------------+       +----------------------------+
-       ^                          ^
-       |                          |
-       |     Uses Dependencies:   |
-       |       - stripe           |
-       |       - dotenv           |
-       |                          |
-       |                          |
++----------------+       +------------------------------------+       +----------+
+|    Frontend    | <---> | Flask Server                       | <---> | Database |
+|  (Detected)    |       | (Util: payment-element/server/...) |       | (Detected) |
++----------------+       +------------------------------------+       +----------+
+         ^                           |
+         |                           | Uses
+         |                           v
+         |                    +----------------+
+         +--------------------+  Stripe API    |
+                              +----------------+
 ```
 
 ## Actual Components Found
@@ -49,10 +46,10 @@
 - Error Handling Pattern
 
 ## Current Architecture
-The current architecture identifies a `frontend` component designed to interact with a backend server implemented as a utility. This backend functionality is primarily provided by `payment-element/server/python/server.py`, which leverages the `Flask` framework. This server utility also integrates with external services using the `stripe` dependency, indicating a focus on payment processing. Configuration management within the server utility is handled via `dotenv`. While a `database` component is detected as part of the overall system, no specific database technology has been identified in the codebase, implying either an abstract placeholder or an external/unspecified data store. The diverse set of languages (`py`, `ts`, `js`, `java`, `rb`) and the extensive `.devcontainer` structure suggest a development environment supporting multiple language backends and client applications, even if the primary detected server-side utility is Python-based Flask.
+The codebase `docai_smart_y9708hjc` incorporates a detected `frontend` component that interacts with a backend system. The core of this backend is a Flask application, as evidenced by the detected `Flask` framework and the `flask` dependency. This Flask application is likely implemented or supported by the `server` utility located at `payment-element/server/python/server.py`. The system integrates with external payment processing functionalities via the `stripe` dependency, suggesting payment-related operations are a central feature. Configuration for the application utilizes environment variables, indicated by the `dotenv` dependency. A `database` component is also detected, implying data persistence, although no specific database technology has been identified. The codebase also contains various files in multiple languages (py, ts, js, java, rb) and numerous `.devcontainer` configurations for different client/server setups, suggesting a versatile or multi-example development environment.
 
 ## Data Flow
-Data flow typically originates from the `frontend` component, which sends requests to the `payment-element/server/python/server.py` utility. This server, built with `Flask`, processes these requests. For payment-related operations, the server uses the `stripe` dependency to interact with the Stripe API. Configuration for the server is loaded using `dotenv`. The server may also interact with the abstract `database` component for persistence or retrieval, although the specific technology for this interaction is not detailed. Responses are then sent back from the server utility to the `frontend`.
+Data flow typically originates from the detected `frontend` component. User interactions on the `frontend` trigger requests that are sent to the `Flask Server` (represented by the `server` utility at `payment-element/server/python/server.py`). The `Flask Server` processes these requests. For payment-related operations, it leverages the `stripe` dependency to interact with the Stripe API. If data persistence is required, the `Flask Server` interacts with the detected `database` component for storage or retrieval. After processing, the `Flask Server` sends appropriate responses back to the `frontend`.
 
 ## Recent Changes Impact
-The "Recent Changes" section only indicates a `generated_at` timestamp of "2026-05-03T16:57:36.029468". No specific functional or architectural changes are detailed, therefore there is no discernible impact on this specific architecture version.
+The `RECENT CHANGES` only indicate the timestamp when this analysis was generated (`"generated_at": "2026-05-03T17:06:32.373064"`). No specific code changes impacting this architecture version (v1.0) have been detected or provided in the analysis.
