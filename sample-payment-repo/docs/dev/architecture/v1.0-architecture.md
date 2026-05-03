@@ -3,17 +3,27 @@
 ## System Overview
 
 ```
-+-----------------+     +-----------------------------------+
-|     frontend    | <-> |  server                           |
-|  (detected)     |     |  (payment-element/server/python/server.py) |
-+-----------------+     +-----------------------------------+
-                                             ^
-                                             | (potential future interaction)
-                                             v
-                                        +----------+
-                                        | database |
-                                        | (detected, but no specific tech) |
-                                        +----------+
++--------------------+
+|     Frontend       |
+|    (Detected)      |
++---------^----------+
+          |
+          | HTTP/API Calls
+          |
++---------v----------+
+|      server        |
+| (Utility: Flask)   |
+| payment-element/    |
+| server/python/      |
+| server.py           |
++---------^----------+
+          |
+          | Database Operations
+          |
++---------v----------+
+|     Database       |
+|    (Detected)      |
++--------------------+
 ```
 
 ## Actual Components Found
@@ -47,10 +57,10 @@
 - Error Handling Pattern
 
 ## Current Architecture
-The `docai_manual_3cuu65vv` codebase consists of a detected `frontend` component and a `server` utility located at `payment-element/server/python/server.py`. This `server` utility is built using the Flask framework and integrates key dependencies such as `stripe` for payment-related functionality and `dotenv` for environment configuration. While a `database` component is detected as part of the system, no specific database technology or implementation is identified within this codebase's dependencies. The project supports multiple programming languages (py, ts, js, java, rb) and diverse development environments, as indicated by the numerous `.devcontainer` configurations for different server and client stacks. This suggests a multi-example or demonstrative repository structure.
+The system is structured around a detected `frontend` component that interacts with a `server` utility, specifically `payment-element/server/python/server.py`. This `server` utility acts as the backend logic, leveraging the `Flask` framework to handle requests. The `server` utility is also designed to communicate with a `database` component, which has been detected but for which no specific technology is identified. The codebase is polyglot, utilizing `py`, `ts`, `js`, `java`, and `rb` languages. Key dependencies such as `stripe` are integrated, likely for payment processing, alongside `flask` for web application functionality and `dotenv` for environment configuration. The application is prepared for deployment using various methods, including `Docker`, `AWS`, `Azure`, and `Vercel`.
 
 ## Data Flow
-Data flow within the documented components typically initiates from the detected `frontend`. User interactions and data inputs from the `frontend` are processed by the `server` utility (`payment-element/server/python/server.py`). This `server` utility, built with Flask, handles incoming requests and leverages the `stripe` dependency for any required payment processing or related API interactions. As no specific database technology is detected, data persistence mechanisms through a database are not detailed within this codebase's scope, although a `database` component is conceptually part of the system architecture.
+Data flow originates from the `frontend` component, which dispatches requests to the `server` utility at `payment-element/server/python/server.py`. This `Flask` application then processes these requests. During processing, it may interact with external services or internal logic using dependencies like `stripe` and manage configuration via `dotenv`. The `server` utility can also perform operations with the `database` component, such as storing or retrieving data. Upon completion of its tasks, the `server` utility sends a response back to the originating `frontend` component.
 
 ## Recent Changes Impact
-The recent change entry indicates the `generated_at` timestamp. This signifies the precise moment this architecture analysis was performed and documented. There are no functional or structural code changes described in the "RECENT CHANGES" that impact the architecture, only the time of documentation generation.
+The recent changes only indicate the timestamp when this analysis was generated (`generated_at`). No specific functional or structural changes to the codebase itself were provided in the "RECENT CHANGES" section, therefore, this specific architecture version (`v1.0`) remains unaffected by any explicit recent code modifications listed.
