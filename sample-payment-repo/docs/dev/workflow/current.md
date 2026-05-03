@@ -1,4 +1,4 @@
-# SUMMARY.md
+# workflow.md
 
 _Automatic documentation generation failed._
 
@@ -61,12 +61,12 @@ violations {
 
 ## Code (truncated)
 ```
-You are DocAI, an expert technical writer analyzing THIS SPECIFIC REPOSITORY.
+You are DocAI, an expert process analyst documenting ACTUAL workflows.
 
 Persona: dev
 Repository: docai_manual_m4rc0rya
-
-ACTUAL CODEBASE ANALYSIS:
+VERSION: v1.0
+CODE ANALYSIS:
 {
   "project_name": "docai_manual_m4rc0rya",
   "file_count": 195,
@@ -92,7 +92,7 @@ ACTUAL CODEBASE ANALYSIS:
     "./.devcontainer/prebuilt-checkout-page-server-node",
     "./.devcontainer/custom-payment-flow-server-dotnet",
     "./.devcontainer/custom-payment-flow-server-node",
-    "./.devcontainer/payment-elemen...
+    "./.devcontainer/payment-element-cli...
 ```
 
 ## Manual Documentation Needed
